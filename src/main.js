@@ -94,9 +94,42 @@ window.addEventListener('click', (event) => {
 
 //------------------Features-------------------------
 
+//-------temp
+// pointlight following cursors
+const mouseCords = new THREE.Vector2()
+window.addEventListener('mousemove', (event)=>{
+    //weird math stuff
+    mouseCords.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouseCords.y = - (event.clientY / window.innerHeight) * 2 + 1;
+
+})
+
+const spotLight = new THREE.SpotLight(0xffffff, 800);
+spotLight.angle = Math.PI / 8; // narrower beam
+spotLight.penumbra = 0.4;      // softness on edges
+spotLight.decay = 2;
+spotLight.distance = 100;
+
+
+scene.add(spotLight);
+scene.add(spotLight.target);   // required so it knows what to "point at"
+
+//-----temp
+
 // Animate
 function animate() {
   requestAnimationFrame(animate);
+
+  // === Spotlight follows cursor ===
+  const vector = new THREE.Vector3(mouseCords.x, mouseCords.y, 0.8); // NDC with z = 0.5 for depth
+  vector.unproject(camera); // convert to world coords
+
+  const dir = vector.sub(camera.position).normalize(); // direction from camera
+  const distance = 30; // how far in front of camera
+  const pos = camera.position.clone().add(dir.multiplyScalar(distance)); // new light position
+
+  spotLight.position.copy(pos); // move spotlight
+  spotLight.target.position.copy(pos.clone().add(dir)); // point it forward
 
   renderer.render(scene, camera);
 }
