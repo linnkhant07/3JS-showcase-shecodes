@@ -104,11 +104,14 @@ window.addEventListener('mousemove', (event)=>{
 
 })
 
-const spotLight = new THREE.SpotLight(0xffffff, 800);
-spotLight.angle = Math.PI / 8; // narrower beam
+const spotLight = new THREE.SpotLight(0xffffff, 1800);
+spotLight.angle = Math.PI / 10; // narrower beam
 spotLight.penumbra = 0.4;      // softness on edges
 spotLight.decay = 2;
-spotLight.distance = 100;
+spotLight.distance = 0;
+
+const spotLightHelper = new THREE.SpotLightHelper(spotLight)
+scene.add(spotLightHelper)
 
 
 scene.add(spotLight);
