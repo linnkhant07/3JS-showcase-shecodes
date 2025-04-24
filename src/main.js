@@ -23,7 +23,7 @@ renderer.setClearColor(0x000000);
 
 // Add object
 const geometry = new THREE.BoxGeometry(5, 5, 5);
-const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
 const cube = new THREE.Mesh(geometry, material);
 scene.add(cube);
 
