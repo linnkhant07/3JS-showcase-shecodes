@@ -37,7 +37,7 @@ scene.add(ambientLight);
 const loader = new GLTFLoader();
 let model;
 loader.load(
-    '/LightSwitch_Off_2.glb',
+    '/LightSwitch_Off_3.glb',
     (gltf) => {
         model = gltf.scene;
 
