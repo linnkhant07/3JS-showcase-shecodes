@@ -41,12 +41,12 @@ loader.load(
     (gltf) => {
         model = gltf.scene;
 
-        model.traverse((child) => {
-            if (child.isMesh) {
-                console.log('Mesh name:', child.name);
-                console.log('Material:', child.material);
-            }
-        });
+        // model.traverse((child) => {
+        //     if (child.isMesh) {
+        //         console.log('Mesh name:', child.name);
+        //         console.log('Material:', child.material);
+        //     }
+        // });
 
         model.scale.set(10, 10, 10); // Adjust size as needed
         model.position.set(5, 5, 5); // Adjust position if needed
@@ -67,7 +67,7 @@ function animate() {
     requestAnimationFrame(animate);
     // cube.rotation.x += 0.01;
     // cube.rotation.y += 0.01;
-    //model.rotation.y += 0.01;
+    model.rotation.y += 0.01;
     renderer.render(scene, camera);
 }
 animate();
