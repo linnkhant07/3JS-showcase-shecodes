@@ -1,4 +1,5 @@
 import './style.css';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import * as THREE from 'three';
 
 //------------------SETUP-------------------------
@@ -21,6 +22,14 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setClearColor(0x000000); // full darkness
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; // for smooth motion
+controls.dampingFactor = 0.05;
+controls.enablePan = true;     // allow camera panning
+controls.minDistance = 10;     // prevent zooming too close
+controls.maxDistance = 200;    // prevent zooming too far
+
 
 //------------------SETUP-------------------------
 
@@ -46,17 +55,17 @@ scene.add(texturedPlane);
 // Sphere
 const sphere = new THREE.Mesh(
   new THREE.SphereGeometry(5, 32, 16),
-  new THREE.MeshStandardMaterial({ color: 0xffff00, wireframe: true })
+  new THREE.MeshStandardMaterial({ color: 0xffff00, wireframe: false })
 );
-sphere.position.set(0,0,0)
+sphere.position.set(0,0,-10)
 scene.add(sphere);
 
 // Sphere2
 const sphere2 = new THREE.Mesh(
   new THREE.SphereGeometry(5, 32, 16),
-  new THREE.MeshStandardMaterial({ color: 0xffff00, wireframe: true })
+  new THREE.MeshStandardMaterial({ color: 0xffff00, wireframe: false })
 );
-sphere2.position.set(20,0,0)
+sphere2.position.set(20,0,-10)
 scene.add(sphere2);
 
 //block
@@ -134,6 +143,7 @@ function animate() {
   spotLight.position.copy(pos); // move spotlight
   spotLight.target.position.copy(pos.clone().add(dir)); // point it forward
 
+  controls.update();
   renderer.render(scene, camera);
 }
 
