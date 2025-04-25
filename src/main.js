@@ -30,6 +30,12 @@ controls.enablePan = true;     // allow camera panning
 controls.minDistance = 10;     // prevent zooming too close
 controls.maxDistance = 200;    // prevent zooming too far
 
+const size = 50;
+const divisions = 50;
+
+const gridHelper = new THREE.GridHelper( size, divisions );
+scene.add( gridHelper );
+
 
 //------------------SETUP-------------------------
 
@@ -49,7 +55,7 @@ const texturedPlane = new THREE.Mesh(
   new THREE.PlaneGeometry(250, 250),
   new THREE.MeshStandardMaterial({ map: bgTexture })
 );
-texturedPlane.position.set(0, 0, -30); // push it behind the scene
+texturedPlane.position.set(0, 0, -40); // push it behind the scene
 scene.add(texturedPlane);
 
 // Sphere
@@ -57,7 +63,7 @@ const sphere = new THREE.Mesh(
   new THREE.SphereGeometry(5, 32, 16),
   new THREE.MeshStandardMaterial({ color: 0xffff00, wireframe: false })
 );
-sphere.position.set(0,0,-30)
+sphere.position.set(0,0,0)
 scene.add(sphere);
 
 // Sphere2
@@ -65,7 +71,7 @@ const sphere2 = new THREE.Mesh(
   new THREE.SphereGeometry(5, 32, 16),
   new THREE.MeshStandardMaterial({ color: 0xffff00, wireframe: false })
 );
-sphere2.position.set(20,0,-30)
+sphere2.position.set(20,0,0)
 scene.add(sphere2);
 
 //block
@@ -74,7 +80,7 @@ const box = new THREE.Mesh(
   new THREE.BoxGeometry(3,3,3),
   new THREE.MeshBasicMaterial(({map: boxTexture}))
 )
-box.position.set(0, 20, 0)
+box.position.set(0, 20, -10)
 scene.add(box)
 
 //------------------Objects-------------------------
@@ -107,9 +113,9 @@ window.addEventListener('click', (event) => {
 // pointlight following cursors
 const mouseCords = new THREE.Vector2()
 window.addEventListener('mousemove', (event)=>{
-    //weird math stuff
-    mouseCords.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouseCords.y = - (event.clientY / window.innerHeight) * 2 + 1;
+  //weird math stuff
+  mouseCords.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouseCords.y = - (event.clientY / window.innerHeight) * 2 + 1;
 
 })
 
@@ -118,6 +124,7 @@ spotLight.angle = Math.PI / 10; // narrower beam
 spotLight.penumbra = 0.4;      // softness on edges
 spotLight.decay = 1.5;
 spotLight.distance = 0;
+
 
 const spotLightHelper = new THREE.SpotLightHelper(spotLight)
 scene.add(spotLightHelper)
@@ -137,10 +144,10 @@ function animate() {
   vector.unproject(camera); // convert to world coords
 
   const dir = vector.sub(camera.position).normalize(); // direction from camera
-  const distance = 30; // how far in front of camera
+  const distance = 1; // how far in front of camera
   const pos = camera.position.clone().add(dir.multiplyScalar(distance)); // new light position
 
-  spotLight.position.copy(pos); // move spotlight
+  spotLight.position.copy(new THREE.Vector3(vector.x,vector.y,pos.z)); // move spotlight
   spotLight.target.position.copy(pos.clone().add(dir)); // point it forward
 
   controls.update();
