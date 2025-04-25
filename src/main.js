@@ -49,7 +49,7 @@ const texturedPlane = new THREE.Mesh(
   new THREE.PlaneGeometry(250, 250),
   new THREE.MeshStandardMaterial({ map: bgTexture })
 );
-texturedPlane.position.set(0, 0, -50); // push it behind the scene
+texturedPlane.position.set(0, 0, -30); // push it behind the scene
 scene.add(texturedPlane);
 
 // Sphere
@@ -57,7 +57,7 @@ const sphere = new THREE.Mesh(
   new THREE.SphereGeometry(5, 32, 16),
   new THREE.MeshStandardMaterial({ color: 0xffff00, wireframe: false })
 );
-sphere.position.set(0,0,-10)
+sphere.position.set(0,0,-30)
 scene.add(sphere);
 
 // Sphere2
@@ -65,7 +65,7 @@ const sphere2 = new THREE.Mesh(
   new THREE.SphereGeometry(5, 32, 16),
   new THREE.MeshStandardMaterial({ color: 0xffff00, wireframe: false })
 );
-sphere2.position.set(20,0,-10)
+sphere2.position.set(20,0,-30)
 scene.add(sphere2);
 
 //block
@@ -113,10 +113,10 @@ window.addEventListener('mousemove', (event)=>{
 
 })
 
-const spotLight = new THREE.SpotLight(0xffffff, 1800);
+const spotLight = new THREE.SpotLight(0xffffff, 150);
 spotLight.angle = Math.PI / 10; // narrower beam
 spotLight.penumbra = 0.4;      // softness on edges
-spotLight.decay = 2;
+spotLight.decay = 1.5;
 spotLight.distance = 0;
 
 const spotLightHelper = new THREE.SpotLightHelper(spotLight)
