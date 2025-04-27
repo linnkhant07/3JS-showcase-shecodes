@@ -61,7 +61,7 @@ console.log(audioLoader)
 
 //------------------Lights-------------------------
 
-// Ambient light (low glow)
+// Ambient light (low glow) #ffffff
 const ambientLight = new THREE.AmbientLight(0xffffff, 0);
 scene.add(ambientLight);
 
@@ -112,6 +112,18 @@ loader.load(
   }
 );
 
+//Table Object
+let table;
+loader.load(
+  '/wooden_table_viejdi1_high.glb',
+  (gltf) => {
+    table = gltf.scene;
+    table.scale.set(10,10,10);
+    table.position.set(0, -10, 20);
+    table.visible = true; 
+    scene.add(table);
+  }
+);
 // Sphere
 const sphere = new THREE.Mesh(
   new THREE.SphereGeometry(5, 32, 16),
