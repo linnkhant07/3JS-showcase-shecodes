@@ -1,5 +1,6 @@
 import './style.css';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import * as THREE from 'three';
 
 //------------------SETUP-------------------------
@@ -57,6 +58,21 @@ const texturedPlane = new THREE.Mesh(
 );
 texturedPlane.position.set(0, 0, -40); // push it behind the scene
 scene.add(texturedPlane);
+
+//On Switch 
+const loader = new GLTFLoader();
+let model;
+loader.load(
+    '/LightSwitch_On.glb',
+    (gltf) => {
+        model = gltf.scene;
+
+        model.scale.set(10, 10, 10); 
+        model.position.set(-10, 5, 5); 
+        model.rotation.y = Math.PI / -2;
+        scene.add(model);
+    }
+);
 
 // Sphere
 const sphere = new THREE.Mesh(
