@@ -40,11 +40,35 @@ scene.add( gridHelper );
 
 //------------------SETUP-------------------------
 
+//------------------Audio-------------------------
+const listener = new THREE.AudioListener();
+camera.add(listener);
+
+// Load a sound and set it up
+const clickSound = new THREE.Audio(listener);
+const audioLoader = new THREE.AudioLoader();
+
+audioLoader.load('/sounds/lightswitchToggle.mp3', function(buffer) {
+    clickSound.setBuffer(buffer);
+    clickSound.setVolume(2); // Adjust volume if needed
+
+    console.log(audioLoader)
+    console.log("1")
+});
+
+console.log(audioLoader)
+//------------------Audio-------------------------
+
 //------------------Lights-------------------------
 
 // Ambient light (low glow)
 const ambientLight = new THREE.AmbientLight(0xffffff, 0);
 scene.add(ambientLight);
+
+const hemisphereLight = new THREE.HemisphereLight( 0xffffbb, 0x080820, 0 );
+const hemisphereLightHelper = new THREE.HemisphereLightHelper( hemisphereLight, 5 );
+scene.add( hemisphereLight );
+scene.add( hemisphereLightHelper );
 
 //------------------Lights-------------------------
 
@@ -61,17 +85,31 @@ scene.add(texturedPlane);
 
 //On Switch 
 const loader = new GLTFLoader();
-let model;
+let lightswitch;
 loader.load(
     '/LightSwitch_On.glb',
     (gltf) => {
-        model = gltf.scene;
+        lightswitch = gltf.scene;
 
-        model.scale.set(10, 10, 10); 
-        model.position.set(-10, 5, 5); 
-        model.rotation.y = Math.PI / -2;
-        scene.add(model);
+        lightswitch.scale.set(3, 3, 3); 
+        lightswitch.position.set(0, 0, 15); 
+        lightswitch.rotation.y = Math.PI / -2;
+        scene.add(lightswitch);
     }
+);
+
+// Load OFF model
+let lightswitchOff;
+loader.load(
+  '/LightSwitch_Off.glb',
+  (gltf) => {
+    lightswitchOff = gltf.scene;
+    lightswitchOff.scale.set(3, 3, 3);
+    lightswitchOff.position.set(0, 0, 15);
+    lightswitchOff.rotation.y = Math.PI / -2;
+    lightswitchOff.visible = false; // Start invisible
+    scene.add(lightswitchOff);
+  }
 );
 
 // Sphere
@@ -97,7 +135,7 @@ const box = new THREE.Mesh(
   new THREE.MeshBasicMaterial(({map: boxTexture}))
 )
 box.position.set(0, 20, -10)
-scene.add(box)
+//scene.add(box)
 
 //------------------Objects-------------------------
 
@@ -117,9 +155,30 @@ window.addEventListener('click', (event) => {
   raycaster.setFromCamera(mouse, camera);
 
   // check if the picking ray is over the lightswitch
-  const intersects = raycaster.intersectObject(box);
+  const intersects = raycaster.intersectObject(lightswitch);
   if (intersects.length > 0) {
     ambientLight.intensity = ambientLight.intensity === 0 ? 1 : 0;
+    hemisphereLight.intensity = hemisphereLight.intensity === 0 ? 1 : 0;
+
+    // Toggle switch models
+    if (lightswitch.visible) {
+      lightswitch.visible = false;
+      lightswitchOff.visible = true;
+    } else {
+      lightswitch.visible = true;
+      lightswitchOff.visible = false;
+    }
+
+    // if (action) {
+    //   action.reset();
+    //   action.play();
+    // }
+
+    // Play the click sound
+    if (clickSound.buffer) {
+      if (clickSound.isPlaying) clickSound.stop();
+      clickSound.play();
+    }
   }
 });
 
@@ -134,12 +193,15 @@ window.addEventListener('mousemove', (event)=>{
   mouseCords.y = - (event.clientY / window.innerHeight) * 2 + 1;
 
 })
-
-const spotLight = new THREE.SpotLight(0xffffff, 150);
-spotLight.angle = Math.PI / 10; // narrower beam
+const spotLight = new THREE.SpotLight(0xffffff, 800);
+spotLight.angle = Math.PI / 8; // narrower beam
 spotLight.penumbra = 0.4;      // softness on edges
-spotLight.decay = 1.5;
-spotLight.distance = 0;
+spotLight.decay = 2;
+spotLight.distance = 100;
+
+
+scene.add(spotLight);
+scene.add(spotLight.target);   // required so it knows what to "point at"
 
 
 const spotLightHelper = new THREE.SpotLightHelper(spotLight)
@@ -156,17 +218,15 @@ function animate() {
   requestAnimationFrame(animate);
 
   // === Spotlight follows cursor ===
-  const vector = new THREE.Vector3(mouseCords.x, mouseCords.y, 0.8); // NDC with z = 0.5 for depth
+  const vector = new THREE.Vector3(mouseCords.x, mouseCords.y, 0.5); // NDC with z = 0.5 for depth
   vector.unproject(camera); // convert to world coords
 
   const dir = vector.sub(camera.position).normalize(); // direction from camera
-  const distance = 1; // how far in front of camera
+  const distance = 5; // how far in front of camera ( i put 1 but that gave weird focused light)
   const pos = camera.position.clone().add(dir.multiplyScalar(distance)); // new light position
 
-  //new THREE.Vector3(vector.x,vector.y,pos.z)
-  spotLight.position.copy(camera.position.clone()); // move spotlight
+  spotLight.position.copy(pos); // move spotlight
   spotLight.target.position.copy(pos.clone().add(dir)); // point it forward
-  spotLight.target.updateMatrixWorld()
 
   spotLightHelper.update(); // refresh helper too
   controls.update();
