@@ -80,7 +80,7 @@ const texturedPlane = new THREE.Mesh(
     new THREE.PlaneGeometry(250, 250),
     new THREE.MeshStandardMaterial({ map: bgTexture })
 );
-texturedPlane.position.set(0, 0, -40); // push it behind the scene
+texturedPlane.position.set(25, 10, -0.25); // push it behind the scene -- previous position (0, 0, -40)
 scene.add(texturedPlane);
 
 //On Switch 
@@ -92,7 +92,7 @@ loader.load(
         lightswitch = gltf.scene;
 
         lightswitch.scale.set(1.5, 1.5, 1.5);
-        lightswitch.position.set(30, 20, -15);
+        lightswitch.position.set(25, 10, 0);
         lightswitch.rotation.y = Math.PI / -2;
         scene.add(lightswitch);
     }
@@ -105,7 +105,7 @@ loader.load(
     (gltf) => {
         lightswitchOff = gltf.scene;
         lightswitchOff.scale.set(1.5, 1.5, 1.5);
-        lightswitchOff.position.set(30, 20, -15);
+        lightswitchOff.position.set(25, 10, 0);
         lightswitchOff.rotation.y = Math.PI / -2;
         lightswitchOff.visible = false; // Start invisible
         scene.add(lightswitchOff);
