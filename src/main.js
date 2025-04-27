@@ -91,8 +91,8 @@ loader.load(
     (gltf) => {
         lightswitch = gltf.scene;
 
-        lightswitch.scale.set(3, 3, 3); 
-        lightswitch.position.set(0, 0, 15); 
+        lightswitch.scale.set(3,3,3); 
+        lightswitch.position.set(30, 20, -15); 
         lightswitch.rotation.y = Math.PI / -2;
         scene.add(lightswitch);
     }
@@ -104,8 +104,8 @@ loader.load(
   '/LightSwitch_Off.glb',
   (gltf) => {
     lightswitchOff = gltf.scene;
-    lightswitchOff.scale.set(3, 3, 3);
-    lightswitchOff.position.set(0, 0, 15);
+    lightswitchOff.scale.set(3,3,3);
+    lightswitchOff.position.set(30, 20, -15);
     lightswitchOff.rotation.y = Math.PI / -2;
     lightswitchOff.visible = false; // Start invisible
     scene.add(lightswitchOff);
@@ -196,8 +196,8 @@ window.addEventListener('mousemove', (event)=>{
 const spotLight = new THREE.SpotLight(0xffffff, 800);
 spotLight.angle = Math.PI / 8; // narrower beam
 spotLight.penumbra = 0.4;      // softness on edges
-spotLight.decay = 2;
-spotLight.distance = 100;
+spotLight.decay = 1.8;
+spotLight.distance = 500;
 
 
 scene.add(spotLight);
