@@ -147,9 +147,12 @@ function animate() {
   const distance = 1; // how far in front of camera
   const pos = camera.position.clone().add(dir.multiplyScalar(distance)); // new light position
 
-  spotLight.position.copy(new THREE.Vector3(vector.x,vector.y,pos.z)); // move spotlight
+  //new THREE.Vector3(vector.x,vector.y,pos.z)
+  spotLight.position.copy(camera.position.clone()); // move spotlight
   spotLight.target.position.copy(pos.clone().add(dir)); // point it forward
+  spotLight.target.updateMatrixWorld()
 
+  spotLightHelper.update(); // refresh helper too
   controls.update();
   renderer.render(scene, camera);
 }
