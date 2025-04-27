@@ -91,7 +91,7 @@ loader.load(
     (gltf) => {
         lightswitch = gltf.scene;
 
-        lightswitch.scale.set(2, 2, 2);
+        lightswitch.scale.set(1.5, 1.5, 1.5);
         lightswitch.position.set(30, 20, -15);
         lightswitch.rotation.y = Math.PI / -2;
         scene.add(lightswitch);
@@ -104,7 +104,7 @@ loader.load(
     '/LightSwitch_Off.glb',
     (gltf) => {
         lightswitchOff = gltf.scene;
-        lightswitchOff.scale.set(2, 2, 2);
+        lightswitchOff.scale.set(1.5, 1.5, 1.5);
         lightswitchOff.position.set(30, 20, -15);
         lightswitchOff.rotation.y = Math.PI / -2;
         lightswitchOff.visible = false; // Start invisible
