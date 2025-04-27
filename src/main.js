@@ -194,7 +194,7 @@ window.addEventListener('mousemove', (event) => {
 
 })
 const spotLight = new THREE.SpotLight(0xffffff, 800);
-spotLight.angle = Math.PI / 8; // narrower beam
+spotLight.angle = Math.PI / 7; // narrower beam
 spotLight.penumbra = 0.4; // softness on edges
 spotLight.decay = 1.8;
 spotLight.distance = 500;
