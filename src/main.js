@@ -28,7 +28,7 @@ renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setClearColor(0x000000); // full darkness
 
-/*
+/* orbit controls disabled
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enabled = false;
 controls.enableDamping = true; // for smooth motion
@@ -37,13 +37,17 @@ controls.enablePan = true; // allow camera panning
 controls.minDistance = 10; // prevent zooming too close
 controls.maxDistance = 200; // prevent zooming too far*/
 
-
 const size = 50;
 const divisions = 50;
 
 const gridHelper = new THREE.GridHelper(size, divisions);
 scene.add(gridHelper);
 
+//draggable objects
+const objects = [];
+
+//hashmap that maps from mesh(obj) to its physics body
+const meshToBody = new Map();
 
 //------------------SETUP-------------------------
 
@@ -81,6 +85,32 @@ const hemisphereLight = new THREE.HemisphereLight(0xffffbb, 0x080820, 0);
 const hemisphereLightHelper = new THREE.HemisphereLightHelper(hemisphereLight, 5);
 scene.add(hemisphereLight);
 scene.add(hemisphereLightHelper);
+
+// pointlight following cursors
+const mouseCords = new THREE.Vector2()
+window.addEventListener('mousemove', (event) => {
+    //weird math stuff
+    mouseCords.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouseCords.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+})
+const spotLight = new THREE.SpotLight(0xffffff, 800);
+spotLight.angle = Math.PI / 8; // narrower beam
+spotLight.penumbra = 0.4; // softness on edges
+spotLight.decay = 1.8;
+spotLight.distance = 500;
+
+
+scene.add(spotLight);
+scene.add(spotLight.target); // required so it knows what to "point at"
+
+
+const spotLightHelper = new THREE.SpotLightHelper(spotLight)
+scene.add(spotLightHelper)
+
+
+scene.add(spotLight);
+scene.add(spotLight.target); // required so it knows what to "point at"
 
 //------------------Lights-------------------------
 
@@ -125,7 +155,7 @@ loader.load(
 );
 
 //Table Object
-const objects = [];
+
 
 let table;
 loader.load(
@@ -159,13 +189,11 @@ loader.load(
       pen.scale.set(0.1, 0.1, 0.1);
       pen.position.set(0, 4, 25);
       pen.visible = true;
-      scene.add(pen);
-      objects.push(pen);
 
       // === Physics body ===
       const radiusTop = 0.1;
       const radiusBottom = 0.1;
-      const height = 0.8;
+      const height = 0.9;
       const numSegments = 8;
 
       const penShape = new CANNON.Cylinder(radiusTop, radiusBottom, height, numSegments);
@@ -182,38 +210,13 @@ loader.load(
 
       penBody.addShape(penShape, new CANNON.Vec3(0, 0, 0), shapeRotation);
 
+      scene.add(pen);
       world.addBody(penBody);
+
+      objects.push(pen); // still add to DragControls array
+      meshToBody.set(pen, penBody); // <-- map the mesh to its body
   }
 );
-
-//temp
-//draggable objects
-const dragControls = new DragControls( objects, camera, renderer.domElement );
-dragControls.transformGroup = true;
-
-// add event listener to highlight dragged objects
-let isDragging;
-
-dragControls.addEventListener( 'dragstart', function ( event ) {
-
-	// event.object.material.emissive.set( 0xaaaaaa );
-  console.log(event.object, "being dragged")
-  isDragging = true;
-
-} );
-
-dragControls.addEventListener( 'dragend', function ( event ) {
-
-	// event.object.material.emissive.set( 0x000000 );
-  console.log(event.object, "not dragged anymore")
-  penBody.position.copy(pen.position);
-  penBody.velocity.set(0, -1, 0);
-  isDragging = false;
-  
-
-} );
-//temp end
-
 
 // Sphere
 const sphere = new THREE.Mesh(
@@ -249,6 +252,38 @@ world.gravity.set(0, -9.82, 0); // Earth gravity
 
 
 //------------------Physics-------------------------
+
+//------------------Drag-and-Drop Controls-------------------------
+
+const dragControls = new DragControls( objects, camera, renderer.domElement );
+dragControls.transformGroup = true;
+
+// add event listener to highlight dragged objects
+let isDragging;
+
+dragControls.addEventListener( 'dragstart', function ( event ) {
+
+	// event.object.material.emissive.set( 0xaaaaaa );
+  console.log(event.object, "being dragged")
+  isDragging = true;
+
+} );
+
+dragControls.addEventListener('dragend', function (event) {
+  const mesh = event.object;
+  console.log("mesh is ", mesh)
+  const body = meshToBody.get(mesh);
+  console.log("body is ", body)
+
+  if (body) {
+    body.position.copy(mesh.position);
+    body.velocity.set(0, -1, 0);
+  }
+  
+  isDragging = false;
+});
+
+//------------------Drag-and-Drop Controls-------------------------
 
 //------------------Features-------------------------
 
@@ -295,40 +330,12 @@ window.addEventListener('click', (event) => {
 
 //------------------Features-------------------------
 
-//-------temp
-// pointlight following cursors
-const mouseCords = new THREE.Vector2()
-window.addEventListener('mousemove', (event) => {
-    //weird math stuff
-    mouseCords.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouseCords.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-})
-const spotLight = new THREE.SpotLight(0xffffff, 800);
-spotLight.angle = Math.PI / 8; // narrower beam
-spotLight.penumbra = 0.4; // softness on edges
-spotLight.decay = 1.8;
-spotLight.distance = 500;
-
-
-scene.add(spotLight);
-scene.add(spotLight.target); // required so it knows what to "point at"
-
-
-const spotLightHelper = new THREE.SpotLightHelper(spotLight)
-scene.add(spotLightHelper)
-
-
-scene.add(spotLight);
-scene.add(spotLight.target); // required so it knows what to "point at"
-
-//-----temp
 
 // Animate
 function animate() {
     requestAnimationFrame(animate);
 
-    // === Spotlight follows cursor ===
+    // === Spotlight follows cursor: start ===
     const vector = new THREE.Vector3(mouseCords.x, mouseCords.y, 0.5); // NDC with z = 0.5 for depth
     vector.unproject(camera); // convert to world coords
 
@@ -340,33 +347,18 @@ function animate() {
     spotLight.target.position.copy(pos.clone().add(dir)); // point it forward
 
     spotLightHelper.update(); // refresh helper too
-    // controls.update();
+    // === Spotlight follows cursor: end ===
+
     renderer.render(scene, camera);
 
     world.step(1 / 60); // physics simulation step
 
+    //drag and drop physics 
     if (pen && penBody && !isDragging) {
       pen.position.copy(penBody.position);
       pen.quaternion.copy(penBody.quaternion);
     }
-  
-
 
 }
-
-
 
 animate();
-
-//to add stars
-function addStar() {
-    const geometry = new THREE.SphereGeometry(0.25, 24, 24)
-    const material = new THREE.MeshStandardMaterial({ color: 0xffffff })
-    const star = new THREE.Mesh(geometry, material)
-
-    const [x, y, z] = Array(3).fill().map(() => THREE.MathUtils.randFloatSpread(100))
-    star.position.set(x, y, z)
-    scene.add(star)
-}
-
-//Array(200).fill().forEach(addStar)
