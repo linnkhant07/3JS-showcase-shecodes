@@ -136,14 +136,41 @@ loader.load(
 
 );
 
-//pen object
-const penGeometry = new THREE.CylinderGeometry(0.1, 0.1, 1.5, 32); // small thin cylinder
-const penMaterial = new THREE.MeshStandardMaterial({ color: 0x0000ff }); // blue pen
-const penMesh = new THREE.Mesh(penGeometry, penMaterial);
 
-// Position the pen above the table so it can fall
-penMesh.position.set(0, 2, 23); // (x, y, z) — same z as table
-scene.add(penMesh);
+let pen, penBody;
+loader.load(
+  '/pen.glb',
+  (gltf) => {
+      pen = gltf.scene;
+      pen.scale.set(0.1, 0.1, 0.1);
+      pen.position.set(0, 5, 25);
+      pen.visible = true;
+      scene.add(pen);
+
+      // === Physics body ===
+      const radiusTop = 0.1;
+      const radiusBottom = 0.1;
+      const height = 0.8;
+      const numSegments = 8;
+
+      const penShape = new CANNON.Cylinder(radiusTop, radiusBottom, height, numSegments);
+
+      penBody = new CANNON.Body({
+          mass: 1, 
+          position: new CANNON.Vec3(0, 5, 25)
+          // DO NOT set shape directly here
+      });
+
+      // 🛠 Rotate the shape by 90 degrees when adding
+      const shapeRotation = new CANNON.Quaternion();
+      shapeRotation.setFromAxisAngle(new CANNON.Vec3(0, 0, 1), Math.PI / 2);
+
+      penBody.addShape(penShape, new CANNON.Vec3(0, 0, 0), shapeRotation);
+
+      world.addBody(penBody);
+  }
+);
+
 
 // Sphere
 const sphere = new THREE.Mesh(
@@ -177,14 +204,6 @@ box.position.set(0, 20, -10)
 const world = new CANNON.World();
 world.gravity.set(0, -9.82, 0); // Earth gravity
 
-// Create Pen Physics Body
-const penShape = new CANNON.Box(new CANNON.Vec3(0.1, 0.75, 0.1)); // half-extents matching cylinder size
-const penBody = new CANNON.Body({
-    mass: 1, // dynamic (falls with gravity)
-    position: new CANNON.Vec3(0, 5, 23), // same as penMesh.position
-    shape: penShape
-});
-world.addBody(penBody);
 
 //------------------Physics-------------------------
 
@@ -283,11 +302,15 @@ function animate() {
 
     world.step(1 / 60); // physics simulation step
 
-    if (penBody) {
-        penMesh.position.copy(penBody.position);
-        penMesh.quaternion.copy(penBody.quaternion);
+    if (pen && penBody) {
+      pen.position.copy(penBody.position);
+      pen.quaternion.copy(penBody.quaternion);
     }
+
+
 }
+
+
 
 animate();
 
