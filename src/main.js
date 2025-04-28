@@ -1,8 +1,11 @@
 import './style.css';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { DragControls } from 'three/addons/controls/DragControls.js';
 import * as CANNON from 'cannon-es';
 import * as THREE from 'three';
+
+
 
 //------------------SETUP-------------------------
 // Scene setup
@@ -25,12 +28,15 @@ renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setClearColor(0x000000); // full darkness
 
+/*
 const controls = new OrbitControls(camera, renderer.domElement);
+controls.enabled = false;
 controls.enableDamping = true; // for smooth motion
 controls.dampingFactor = 0.05;
 controls.enablePan = true; // allow camera panning
 controls.minDistance = 10; // prevent zooming too close
-controls.maxDistance = 200; // prevent zooming too far
+controls.maxDistance = 200; // prevent zooming too far*/
+
 
 const size = 50;
 const divisions = 50;
@@ -40,6 +46,11 @@ scene.add(gridHelper);
 
 
 //------------------SETUP-------------------------
+
+//------------------Interact-------------------------
+
+
+//------------------Interact-------------------------
 
 //------------------Audio-------------------------
 const listener = new THREE.AudioListener();
@@ -114,6 +125,8 @@ loader.load(
 );
 
 //Table Object
+const objects = [];
+
 let table;
 loader.load(
     '/Centered_Table.glb',
@@ -123,6 +136,7 @@ loader.load(
         table.position.set(0, -3, 23);
         table.visible = true;
         scene.add(table);
+        // objects.push(table);
 
         // === Physics body ===
         const tableShape = new CANNON.Box(new CANNON.Vec3(5, 0.25, 5)); // approx. size
@@ -143,9 +157,10 @@ loader.load(
   (gltf) => {
       pen = gltf.scene;
       pen.scale.set(0.1, 0.1, 0.1);
-      pen.position.set(0, 5, 25);
+      pen.position.set(0, 4, 25);
       pen.visible = true;
       scene.add(pen);
+      objects.push(pen);
 
       // === Physics body ===
       const radiusTop = 0.1;
@@ -157,7 +172,7 @@ loader.load(
 
       penBody = new CANNON.Body({
           mass: 1, 
-          position: new CANNON.Vec3(0, 5, 25)
+          position: new CANNON.Vec3(0, 4, 25)
           // DO NOT set shape directly here
       });
 
@@ -170,6 +185,34 @@ loader.load(
       world.addBody(penBody);
   }
 );
+
+//temp
+//draggable objects
+const dragControls = new DragControls( objects, camera, renderer.domElement );
+dragControls.transformGroup = true;
+
+// add event listener to highlight dragged objects
+let isDragging;
+
+dragControls.addEventListener( 'dragstart', function ( event ) {
+
+	// event.object.material.emissive.set( 0xaaaaaa );
+  console.log(event.object, "being dragged")
+  isDragging = true;
+
+} );
+
+dragControls.addEventListener( 'dragend', function ( event ) {
+
+	// event.object.material.emissive.set( 0x000000 );
+  console.log(event.object, "not dragged anymore")
+  penBody.position.copy(pen.position);
+  penBody.velocity.set(0, -1, 0);
+  isDragging = false;
+  
+
+} );
+//temp end
 
 
 // Sphere
@@ -297,15 +340,16 @@ function animate() {
     spotLight.target.position.copy(pos.clone().add(dir)); // point it forward
 
     spotLightHelper.update(); // refresh helper too
-    controls.update();
+    // controls.update();
     renderer.render(scene, camera);
 
     world.step(1 / 60); // physics simulation step
 
-    if (pen && penBody) {
+    if (pen && penBody && !isDragging) {
       pen.position.copy(penBody.position);
       pen.quaternion.copy(penBody.quaternion);
     }
+  
 
 
 }
@@ -313,7 +357,6 @@ function animate() {
 
 
 animate();
-
 
 //to add stars
 function addStar() {
