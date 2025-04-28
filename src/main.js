@@ -116,23 +116,23 @@ loader.load(
 //Table Object
 let table;
 loader.load(
-  '/wooden_table_viejdi1_high.glb',
-  (gltf) => {
-    table = gltf.scene;
-    table.scale.set(10,10,10);
-    table.position.set(0, -10, 23);
-    table.visible = true; 
-    scene.add(table);
+    '/Centered_Table.glb',
+    (gltf) => {
+        table = gltf.scene;
+        table.scale.set(10, 10, 10);
+        table.position.set(0, -3, 23);
+        table.visible = true;
+        scene.add(table);
 
-    // === Physics body ===
-    const tableShape = new CANNON.Box(new CANNON.Vec3(5, 0.25, 5)); // approx. size
-    const tableBody = new CANNON.Body({
-      mass: 0, // static
-      position: new CANNON.Vec3(0, -10, 23), // match table position
-      shape: tableShape
-    });
-    world.addBody(tableBody);
-  }
+        // === Physics body ===
+        const tableShape = new CANNON.Box(new CANNON.Vec3(5, 0.25, 5)); // approx. size
+        const tableBody = new CANNON.Body({
+            mass: 0, // static
+            position: new CANNON.Vec3(0, -3.18, 23), // match table position
+            shape: tableShape
+        });
+        world.addBody(tableBody);
+    }
 
 );
 
@@ -151,7 +151,7 @@ const sphere = new THREE.Mesh(
     new THREE.MeshStandardMaterial({ color: 0xffff00, wireframe: false })
 );
 sphere.position.set(0, 0, 0)
-//scene.add(sphere);
+    //scene.add(sphere);
 
 // Sphere2
 const sphere2 = new THREE.Mesh(
@@ -159,7 +159,7 @@ const sphere2 = new THREE.Mesh(
     new THREE.MeshStandardMaterial({ color: 0xffff00, wireframe: false })
 );
 sphere2.position.set(20, 0, 0)
-//scene.add(sphere2);
+    //scene.add(sphere2);
 
 //block
 const boxTexture = new THREE.TextureLoader().load('lightswitch.webp')
@@ -180,9 +180,9 @@ world.gravity.set(0, -9.82, 0); // Earth gravity
 // Create Pen Physics Body
 const penShape = new CANNON.Box(new CANNON.Vec3(0.1, 0.75, 0.1)); // half-extents matching cylinder size
 const penBody = new CANNON.Body({
-  mass: 1, // dynamic (falls with gravity)
-  position: new CANNON.Vec3(0, 5, 23), // same as penMesh.position
-  shape: penShape
+    mass: 1, // dynamic (falls with gravity)
+    position: new CANNON.Vec3(0, 5, 23), // same as penMesh.position
+    shape: penShape
 });
 world.addBody(penBody);
 
@@ -281,11 +281,11 @@ function animate() {
     controls.update();
     renderer.render(scene, camera);
 
-    world.step(1/60); // physics simulation step
+    world.step(1 / 60); // physics simulation step
 
     if (penBody) {
-      penMesh.position.copy(penBody.position);
-      penMesh.quaternion.copy(penBody.quaternion);
+        penMesh.position.copy(penBody.position);
+        penMesh.quaternion.copy(penBody.quaternion);
     }
 }
 
