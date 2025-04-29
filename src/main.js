@@ -288,26 +288,14 @@ loader.load(
 );
 
 
-//
-
-
-
-// Sphere
-const sphere = new THREE.Mesh(
-    new THREE.SphereGeometry(5, 32, 16),
-    new THREE.MeshStandardMaterial({ color: 0xffff00, wireframe: false })
+//button to click shoot stars
+const shootStarPanel = new THREE.Mesh(
+  new THREE.BoxGeometry(10, 6, 0), // width, height, depth
+  new THREE.MeshBasicMaterial({ color: 0x00ffff }) // cyan glowing panel
 );
-sphere.position.set(0, 0, 0)
-    //scene.add(sphere);
+shootStarPanel.position.set(-20, 10, 0); // place it near your wall (adjust if needed)
+scene.add(shootStarPanel);
 
-//block
-const boxTexture = new THREE.TextureLoader().load('lightswitch.webp')
-const box = new THREE.Mesh(
-    new THREE.BoxGeometry(3, 3, 3),
-    new THREE.MeshBasicMaterial(({ map: boxTexture }))
-)
-box.position.set(0, 20, -10)
-    //scene.add(box)
 
 //------------------Objects-------------------------
 
@@ -330,19 +318,6 @@ dragControls.addEventListener('dragstart', function (event) {
   previousPositions.set(mesh, mesh.position.clone());
   previousTimes.set(mesh, performance.now()); // store high-resolution time
 });
-
-
-// dragControls.addEventListener('dragend', function (event) {
-//   const mesh = event.object;
-//   const body = meshToBody.get(mesh);
-
-//   if (body) {
-//     body.position.copy(mesh.position);
-//     body.velocity.set(0, -8, 0);
-//   }
-  
-//   isDragging = false;
-// });
 
 dragControls.addEventListener('dragend', function (event) {
   const mesh = event.object;
