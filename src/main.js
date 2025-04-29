@@ -55,6 +55,14 @@ const meshToBody = new Map();
 
 //------------------SETUP-------------------------
 
+//------------------Physics-------------------------
+
+const world = new CANNON.World();
+world.gravity.set(0, -9.82, 0); // Earth gravity
+
+
+//------------------Physics-------------------------
+
 //------------------Interact-------------------------
 
 
@@ -170,12 +178,15 @@ loader.load(
         scene.add(table);
         // objects.push(table);
 
+
         // === Physics body ===
+        const tablePhysMat = new CANNON.Material();
         const tableShape = new CANNON.Box(new CANNON.Vec3(5, 0.25, 5)); // approx. size
         tableBody = new CANNON.Body({
             mass: 0, // static
             position: new CANNON.Vec3(0, -3.18, 23), // match table position
-            shape: tableShape
+            shape: tableShape,
+            material: tablePhysMat
         });
         world.addBody(tableBody);
     }
@@ -241,17 +252,28 @@ loader.load(
       // === Physics body for venus ===
       const venusShape = new CANNON.Sphere(1); // assume radius 0.5 for example
 
+      const venusPhysMat = new CANNON.Material()
       venusBody = new CANNON.Body({
-          mass: 1, 
-          position: new CANNON.Vec3(0, 6, 20)
+          mass: 0.9, 
+          position: new CANNON.Vec3(0, 6, 20),
+          material: venusPhysMat
       });
 
 
       venusBody.addShape(venusShape);
-
       world.addBody(venusBody);
       objects.push(venus);
       meshToBody.set(venus, venusBody);
+
+      // Check if tableBody is already loaded
+      //create boucning stuff
+      const tableVenusContactMat = new CANNON.ContactMaterial(
+        tablePhysMat,
+        venusPhysMat,
+        {restitution: 0.8}
+      )
+
+      world.addContactMaterial(tableVenusContactMat)
 
       // === Create helper AFTER venusBody is created ===
       const venusHelper = new THREE.Mesh(
@@ -264,6 +286,9 @@ loader.load(
       scene.add(venusHelper);
   }
 );
+
+
+//
 
 
 
@@ -286,13 +311,6 @@ box.position.set(0, 20, -10)
 
 //------------------Objects-------------------------
 
-//------------------Physics-------------------------
-
-const world = new CANNON.World();
-world.gravity.set(0, -9.82, 0); // Earth gravity
-
-
-//------------------Physics-------------------------
 
 //------------------Drag-and-Drop Controls-------------------------
 
