@@ -106,8 +106,8 @@ window.addEventListener('mousemove', (event) => {
     mouseCords.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
 })
-const spotLight = new THREE.SpotLight(0xffffff, 800);
-spotLight.angle = Math.PI / 8; // narrower beam
+const spotLight = new THREE.SpotLight(0xffffff, 700);
+spotLight.angle = Math.PI / 10; // narrower beam
 spotLight.penumbra = 0.4; // softness on edges
 spotLight.decay = 1.8;
 spotLight.distance = 500;
@@ -411,7 +411,7 @@ function animate() {
   vector.unproject(camera); // convert to world coords
 
   const dir = vector.sub(camera.position).normalize(); // direction from camera
-  const distance = 5; // how far in front of camera
+  const distance = 0.1; // how far in front of camera
   const pos = camera.position.clone().add(dir.multiplyScalar(distance)); // new light position
 
   spotLight.position.copy(pos); // move spotlight
