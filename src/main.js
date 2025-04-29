@@ -31,7 +31,7 @@ renderer.setClearColor(0x000000); // full darkness
 
 /* orbit controls disabled */
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.enabled = false;
+controls.enabled = true;
 controls.enableDamping = true; // for smooth motion
 controls.dampingFactor = 0.05;
 controls.enablePan = true; // allow camera panning
@@ -327,6 +327,28 @@ loader.load(
     }
 );
 
+//--- FOR ON COMPUTER ---
+
+//const sphereSize = 1;
+
+/*Computer Point Light (green on button)
+const computerOnLight = new THREE.PointLight(0x39ff14, 0.8, 100);
+computerOnLight.position.set(1.65, -2.2, 19.91);
+scene.add(computerOnLight);
+
+
+const computerOnLightHelper = new THREE.PointLightHelper(computerOnLight, sphereSize);
+scene.add(computerOnLightHelper);
+*/
+
+/* Computer Point Light (when on computer screen)
+const computerScreen = new THREE.PointLight(0xffffff, 1, 100);
+computerScreen.position.set(0, 1, 19.8);
+scene.add(computerScreen);
+
+const computerScreenHelper = new THREE.PointLightHelper(computerOnLight, sphereSize);
+scene.add(computerScreenHelper);
+*/
 
 //------------------Drag-and-Drop Controls-------------------------
 
