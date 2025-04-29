@@ -31,7 +31,7 @@ renderer.setClearColor(0x000000); // full darkness
 
 /* orbit controls disabled */
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.enabled = true;
+controls.enabled = false;
 controls.enableDamping = true; // for smooth motion
 controls.dampingFactor = 0.05;
 controls.enablePan = true; // allow camera panning
@@ -169,11 +169,11 @@ loader.load(
 //Table Object
 let table, tableBody;
 loader.load(
-    '/Centered_Table.glb',
+    '/desk.glb',
     (gltf) => {
         table = gltf.scene;
         table.scale.set(10, 10, 10);
-        table.position.set(0, -3, 23);
+        table.position.set(0, -11, 20);
         table.visible = true;
         scene.add(table);
         // objects.push(table);
@@ -237,7 +237,7 @@ loader.load(
     (gltf) => {
         venus = gltf.scene;
         venus.scale.set(0.01, 0.01, 0.01);
-        venus.position.set(0, 6, 20);
+        venus.position.set(-5, 6, 20);
         venus.visible = true;
         const texture = textureLoader.load('/textures/venus_surface.jpeg'); // Adjust path
 
@@ -255,7 +255,7 @@ loader.load(
         const venusPhysMat = new CANNON.Material()
         venusBody = new CANNON.Body({
             mass: 0.9,
-            position: new CANNON.Vec3(0, 6, 20),
+            position: new CANNON.Vec3(-5, 6, 20),
             material: venusPhysMat
         });
 
@@ -318,8 +318,8 @@ loader.load(
 
 
         computer = gltf.scene;
-        computer.scale.set(6, 6, 6);
-        computer.position.set(0, -3, 19);
+        computer.scale.set(6.5, 6.5, 6.5);
+        computer.position.set(0, -3, 18);
         computer.rotation.y = Math.PI / -2;
         computer.visible = true; // Start invisible
 
