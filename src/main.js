@@ -48,6 +48,7 @@ const textureLoader = new TextureLoader();
 
 //draggable objects
 const objects = [];
+const helpers = [];
 
 //hashmap that maps from mesh(obj) to its physics body
 const meshToBody = new Map();
@@ -219,13 +220,13 @@ loader.load(
   }
 );
 
-let venus;
+let venus, venusBody;
 loader.load(
   '/venus.glb',
   (gltf) => {
       venus = gltf.scene;
       venus.scale.set(0.01, 0.01, 0.01);
-      venus.position.set(0, 6, 18);
+      venus.position.set(0, 6, 20);
       venus.visible = true;
       const texture = textureLoader.load('/textures/venus_surface.jpeg'); // Adjust path
 
@@ -237,8 +238,32 @@ loader.load(
       });
 
       scene.add(venus);
+      // === Physics body for venus ===
+      const venusShape = new CANNON.Sphere(1); // assume radius 0.5 for example
+
+      venusBody = new CANNON.Body({
+          mass: 1, 
+          position: new CANNON.Vec3(0, 6, 20)
+      });
+
+      venusBody.addShape(venusShape);
+
+      world.addBody(venusBody);
+      objects.push(venus);
+      meshToBody.set(venus, venusBody);
+
+      // === Create helper AFTER venusBody is created ===
+      const venusHelper = new THREE.Mesh(
+        new THREE.SphereGeometry(1, 16, 16), // same radius as venusShape
+        new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true })
+      );
+      venusHelper.position.copy(venusBody.position);
+
+      helpers.push({ helper: venusHelper, body: venusBody });
+      scene.add(venusHelper);
   }
 );
+
 
 
 // Sphere
@@ -248,14 +273,6 @@ const sphere = new THREE.Mesh(
 );
 sphere.position.set(0, 0, 0)
     //scene.add(sphere);
-
-// Sphere2
-const sphere2 = new THREE.Mesh(
-    new THREE.SphereGeometry(5, 32, 16),
-    new THREE.MeshStandardMaterial({ color: 0xffff00, wireframe: false })
-);
-sphere2.position.set(20, 0, 0)
-    //scene.add(sphere2);
 
 //block
 const boxTexture = new THREE.TextureLoader().load('lightswitch.webp')
@@ -300,7 +317,7 @@ dragControls.addEventListener('dragend', function (event) {
 
   if (body) {
     body.position.copy(mesh.position);
-    body.velocity.set(0, -1, 0);
+    body.velocity.set(0, -5, 0);
   }
   
   isDragging = false;
@@ -356,32 +373,47 @@ window.addEventListener('click', (event) => {
 
 // Animate
 function animate() {
-    requestAnimationFrame(animate);
+  requestAnimationFrame(animate);
 
-    // === Spotlight follows cursor: start ===
-    const vector = new THREE.Vector3(mouseCords.x, mouseCords.y, 0.5); // NDC with z = 0.5 for depth
-    vector.unproject(camera); // convert to world coords
+  // === Spotlight follows cursor: start ===
+  const vector = new THREE.Vector3(mouseCords.x, mouseCords.y, 0.5); // NDC with z = 0.5 for depth
+  vector.unproject(camera); // convert to world coords
 
-    const dir = vector.sub(camera.position).normalize(); // direction from camera
-    const distance = 5; // how far in front of camera ( i put 1 but that gave weird focused light)
-    const pos = camera.position.clone().add(dir.multiplyScalar(distance)); // new light position
+  const dir = vector.sub(camera.position).normalize(); // direction from camera
+  const distance = 5; // how far in front of camera
+  const pos = camera.position.clone().add(dir.multiplyScalar(distance)); // new light position
 
-    spotLight.position.copy(pos); // move spotlight
-    spotLight.target.position.copy(pos.clone().add(dir)); // point it forward
+  spotLight.position.copy(pos); // move spotlight
+  spotLight.target.position.copy(pos.clone().add(dir)); // point it forward
+  spotLightHelper.update(); // refresh helper too
+  // === Spotlight follows cursor: end ===
 
-    spotLightHelper.update(); // refresh helper too
-    // === Spotlight follows cursor: end ===
+  // === Physics step ===
+  world.step(1 / 60); // physics simulation step
 
-    renderer.render(scene, camera);
+  // === Drag and drop physics syncing ===
+  if (!isDragging) {
+      for (let mesh of objects) {
+          const body = meshToBody.get(mesh);
+          if (body) {
+              mesh.position.copy(body.position);
+              mesh.quaternion.copy(body.quaternion);
+          }
+      }
+  }
 
-    world.step(1 / 60); // physics simulation step
+  console.log("helpers are ",helpers)
+  // === (Optional) Update helpers if you have them ===
+  for (let { helper, body } of helpers) {
+      console.log("helper is ", helper)
+      console.log("body is ", body)
+      helper.position.copy(body.position);
+      helper.quaternion.copy(body.quaternion);
+  }
 
-    //drag and drop physics 
-    if (pen && penBody && !isDragging) {
-      pen.position.copy(penBody.position);
-      pen.quaternion.copy(penBody.quaternion);
-    }
-
+  // === Render scene ===
+  renderer.render(scene, camera);
 }
+
 
 animate();
