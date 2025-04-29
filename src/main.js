@@ -4,6 +4,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { DragControls } from 'three/addons/controls/DragControls.js';
 import * as CANNON from 'cannon-es';
 import * as THREE from 'three';
+import { TextureLoader } from 'three';
 
 
 
@@ -42,6 +43,8 @@ const divisions = 50;
 
 const gridHelper = new THREE.GridHelper(size, divisions);
 scene.add(gridHelper);
+
+const textureLoader = new TextureLoader();
 
 //draggable objects
 const objects = [];
@@ -155,8 +158,6 @@ loader.load(
 );
 
 //Table Object
-
-
 let table;
 loader.load(
     '/Centered_Table.glb',
@@ -217,6 +218,28 @@ loader.load(
       meshToBody.set(pen, penBody); // <-- map the mesh to its body
   }
 );
+
+let venus;
+loader.load(
+  '/venus.glb',
+  (gltf) => {
+      venus = gltf.scene;
+      venus.scale.set(0.01, 0.01, 0.01);
+      venus.position.set(0, 6, 18);
+      venus.visible = true;
+      const texture = textureLoader.load('/textures/venus_surface.jpeg'); // Adjust path
+
+      venus.traverse((child) => {
+        if (child.isMesh) {
+          child.material.map = texture;
+          child.material.needsUpdate = true;
+        }
+      });
+
+      scene.add(venus);
+  }
+);
+
 
 // Sphere
 const sphere = new THREE.Mesh(
