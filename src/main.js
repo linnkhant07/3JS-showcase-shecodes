@@ -53,7 +53,7 @@ const helpers = [];
 //hashmap that maps from mesh(obj) to its physics body
 const meshToBody = new Map();
 
-//------------------SETUP-------------------------
+//------------------SETUP------------------------- Z
 
 //------------------Physics-------------------------
 
@@ -80,11 +80,8 @@ audioLoader.load('/sounds/lightswitchToggle.mp3', function(buffer) {
     clickSound.setBuffer(buffer);
     clickSound.setVolume(2); // Adjust volume if needed
 
-    console.log(audioLoader)
-    console.log("1")
 });
 
-console.log(audioLoader)
     //------------------Audio-------------------------
 
 //------------------Lights-------------------------
@@ -148,9 +145,16 @@ loader.load(
         lightswitch.scale.set(1.5, 1.5, 1.5);
         lightswitch.position.set(25, 10, 0);
         lightswitch.rotation.y = Math.PI / -2;
+        
+        lightswitch.traverse((child) => {
+          if (child.isMesh) {
+              child.userData.name = 'lightSwitch';
+          }
+        });
         scene.add(lightswitch);
     }
 );
+
 
 // Load OFF model
 let lightswitchOff;
@@ -294,6 +298,7 @@ const shootStarPanel = new THREE.Mesh(
   new THREE.MeshBasicMaterial({ color: 0x00ffff }) // cyan glowing panel
 );
 shootStarPanel.position.set(-20, 10, 0); // place it near your wall (adjust if needed)
+shootStarPanel.userData.name = "shootStarPanel"
 scene.add(shootStarPanel);
 
 
@@ -363,6 +368,7 @@ const raycaster = new THREE.Raycaster(); //Raycasting is used for mouse picking
 const mouse = new THREE.Vector2();
 
 window.addEventListener('click', (event) => {
+    const clickableObjects = [lightswitch, shootStarPanel]; // list of clickable things
 
     // calculate pointer position in normalized device coordinates
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -370,14 +376,21 @@ window.addEventListener('click', (event) => {
 
     // update the picking ray with the camera and pointer position
     raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(clickableObjects);
 
-    // check if the picking ray is over the lightswitch
-    const intersects = raycaster.intersectObject(lightswitch);
     if (intersects.length > 0) {
+      const clickedObject = intersects[0].object;
+  
+      if (clickedObject.userData.name === 'shootStarPanel') {
+        spawnShootingStars();
+        console.log(shootingStars)
+
+      } else if (clickedObject.userData.name === 'lightSwitch') {
+        console.log("inside intersects, ", intersects[0].object)
+        // toggle lights
         ambientLight.intensity = ambientLight.intensity === 0 ? 1 : 0;
         hemisphereLight.intensity = hemisphereLight.intensity === 0 ? 1 : 0;
 
-        // Toggle switch models
         if (lightswitch.visible) {
             lightswitch.visible = false;
             lightswitchOff.visible = true;
@@ -386,20 +399,50 @@ window.addEventListener('click', (event) => {
             lightswitchOff.visible = false;
         }
 
-        // if (action) {
-        //   action.reset();
-        //   action.play();
-        // }
-
-        // Play the click sound
         if (clickSound.buffer) {
             if (clickSound.isPlaying) clickSound.stop();
             clickSound.play();
         }
+      }
     }
+
 });
 
 //------------------Features-------------------------
+
+//------------------Shooting Stars-------------------------
+
+const shootingStars = []; // store all active stars
+function spawnShootingStars() {
+  for (let i = 0; i < 100; i++) {
+      const star = new THREE.Mesh(
+          new THREE.SphereGeometry(0.2, 8, 8),
+          new THREE.MeshBasicMaterial({ color:  new THREE.Color().setHSL(Math.random(), 1, 0.8) })
+      );
+
+      // Random X/Y near center, Z behind scene
+      star.position.set(
+          (Math.random() - 0.5) * 40, // x: [-20, 20]
+          (Math.random() - 0.5) * 20, // y: [-10, 10]
+          -40 + Math.random() * 20   // z: [-40, -20]
+      );
+
+      // Random velocity mostly in +Z
+      star.userData.velocity = new THREE.Vector3(
+          (Math.random() - 0.5) * .5, // x drift
+          (Math.random() - 0.5) * .5, // y drift
+          0.8 + Math.random() * 0.8    // strong +z
+      );
+
+      scene.add(star);
+      shootingStars.push(star);
+  }
+}
+
+
+
+
+//------------------Shooting Stars-------------------------
 
 
 // Animate
@@ -433,11 +476,21 @@ function animate() {
       }
   }
 
-  console.log("helpers are ",helpers)
+  for (let i = shootingStars.length - 1; i >= 0; i--) {
+    const star = shootingStars[i];
+
+    // move
+    star.position.add(star.userData.velocity);
+
+    // remove if it went too far
+    if (star.position.z > 50) {
+        scene.remove(star);
+        shootingStars.splice(i, 1);
+    }
+}
+
   // === (Optional) Update helpers if you have them ===
   for (let { helper, body } of helpers) {
-      console.log("helper is ", helper)
-      console.log("body is ", body)
       helper.position.copy(body.position);
       helper.quaternion.copy(body.quaternion);
   }
