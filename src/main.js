@@ -159,7 +159,7 @@ loader.load(
 );
 
 //Table Object
-let table;
+let table, tableBody;
 loader.load(
     '/Centered_Table.glb',
     (gltf) => {
@@ -172,7 +172,7 @@ loader.load(
 
         // === Physics body ===
         const tableShape = new CANNON.Box(new CANNON.Vec3(5, 0.25, 5)); // approx. size
-        const tableBody = new CANNON.Body({
+        tableBody = new CANNON.Body({
             mass: 0, // static
             position: new CANNON.Vec3(0, -3.18, 23), // match table position
             shape: tableShape
@@ -245,6 +245,7 @@ loader.load(
           mass: 1, 
           position: new CANNON.Vec3(0, 6, 20)
       });
+
 
       venusBody.addShape(venusShape);
 
