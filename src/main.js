@@ -56,7 +56,7 @@ const size = 50;
 const divisions = 50;
 
 const gridHelper = new THREE.GridHelper(size, divisions);
-scene.add(gridHelper);
+// scene.add(gridHelper);
 
 const textureLoader = new TextureLoader();
 
@@ -103,7 +103,7 @@ scene.add(ambientLight);
 const hemisphereLight = new THREE.HemisphereLight(0xffffbb, 0x080820, 0);
 const hemisphereLightHelper = new THREE.HemisphereLightHelper(hemisphereLight, 5);
 scene.add(hemisphereLight);
-scene.add(hemisphereLightHelper);
+// scene.add(hemisphereLightHelper);
 
 // pointlight following cursors
 const mouseCords = new THREE.Vector2()
@@ -125,7 +125,7 @@ scene.add(spotLight.target); // required so it knows what to "point at"
 
 
 const spotLightHelper = new THREE.SpotLightHelper(spotLight)
-scene.add(spotLightHelper)
+// scene.add(spotLightHelper)
 
 
 scene.add(spotLight);
@@ -203,12 +203,12 @@ loader.load(
             material: tablePhysMat
         });
 
-        const debugBox = new THREE.Mesh(
-          new THREE.BoxGeometry(21, 2, 21),
-          new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true })
-        );
-        debugBox.position.set(0, -3.8, 20); // match tableBody
-        scene.add(debugBox);
+        // const debugBox = new THREE.Mesh(
+        //   new THREE.BoxGeometry(21, 2, 21),
+        //   new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true })
+        // );
+        // debugBox.position.set(0, -3.8, 20); // match tableBody
+        // scene.add(debugBox);
         world.addBody(tableBody);
     }
 
@@ -309,6 +309,14 @@ loader.load(
 
       world.addContactMaterial(tableVenusContactMat)
 
+      //with the computer
+      const computerVenusContact = new CANNON.ContactMaterial(
+        venusPhysMat,
+        computerPhysMat,
+        { restitution: 0.6 } // nice bounce
+      );
+      world.addContactMaterial(computerVenusContact);
+
       // === Create helper AFTER venusBody is created ===
       const venusHelper = new THREE.Mesh(
         new THREE.SphereGeometry(1.12, 16, 16), // same radius as venusShape
@@ -317,7 +325,7 @@ loader.load(
       venusHelper.position.copy(venusBody.position);
 
       helpers.push({ helper: venusHelper, body: venusBody });
-      scene.add(venusHelper);
+      // scene.add(venusHelper);
   }
 );
 
@@ -338,7 +346,7 @@ scene.add(shootStarPanel);
 //------------------Computer Controls and Animation-------------------------
 
 //--- FOR OFF COMPUTER ---
-let computerOff;
+let computerOff, computerPhysMat;
 loader.load(
     '/Computer/Off_Computer.glb',
     (gltf) => {
@@ -351,6 +359,54 @@ loader.load(
         computerOff.visible = true; // Start invisible
 
         scene.add(computerOff);
+
+        // === Physics setup for the computer ===
+        computerPhysMat = new CANNON.Material();
+        const computerBody = new CANNON.Body({
+          mass: 0, // static
+          position: new CANNON.Vec3(0, -2.5, 20),
+          material: computerPhysMat
+        });
+
+        // --- Add shapes for each visible part ---
+        // Monitor
+        const monitorShape = new CANNON.Box(new CANNON.Vec3(1.5, 1.5, 1));
+        computerBody.addShape(monitorShape, new CANNON.Vec3(0, 1.5, 0)); // top of box
+
+        // Keyboard
+        const keyboardShape = new CANNON.Box(new CANNON.Vec3(4, 0.2, 1));
+        computerBody.addShape(keyboardShape, new CANNON.Vec3(0, -1.1, 1.4));
+
+        // CPU box
+        const baseShape = new CANNON.Box(new CANNON.Vec3(1.6, 4.6, 1.3));
+        computerBody.addShape(baseShape, new CANNON.Vec3(0, 0, 0));
+
+        world.addBody(computerBody);
+
+        // const computerHelper = new THREE.Mesh(
+        //   new THREE.BoxGeometry(3, 3, 2), // monitor
+        //   new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true })
+        // );
+        // computerHelper.position.set(0, -1.5 + 1.5, 18);
+        // scene.add(computerHelper);
+        // helpers.push({ helper: computerHelper, body: computerBody });
+        
+        // const keyboardHelper = new THREE.Mesh(
+        //   new THREE.BoxGeometry(8, 0.4, 2),
+        //   new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true })
+        // );
+        // keyboardHelper.position.set(0, -4.1, 19.4);
+        // scene.add(keyboardHelper);
+        // helpers.push({ helper: keyboardHelper, body: computerBody });
+        
+        // const baseHelper = new THREE.Mesh(
+        //   new THREE.BoxGeometry(3.2, 9.2, 2.6),
+        //   new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true })
+        // );
+        // baseHelper.position.set(0, -3, 18);
+        // scene.add(baseHelper);
+        // helpers.push({ helper: baseHelper, body: computerBody });
+        
     }
 );
 
