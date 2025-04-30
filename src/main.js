@@ -195,13 +195,20 @@ loader.load(
 
 
         // === Physics body ===
-        const tableShape = new CANNON.Box(new CANNON.Vec3(5, 0.25, 5)); // approx. size
+        const tableShape = new CANNON.Box(new CANNON.Vec3(10.5, 1, 10.5));
         tableBody = new CANNON.Body({
             mass: 0, // static
-            position: new CANNON.Vec3(0, -3.18, 23), // match table position
+            position: new CANNON.Vec3(0, -3.8, 20), // match table position
             shape: tableShape,
             material: tablePhysMat
         });
+
+        const debugBox = new THREE.Mesh(
+          new THREE.BoxGeometry(21, 2, 21),
+          new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true })
+        );
+        debugBox.position.set(0, -3.8, 20); // match tableBody
+        scene.add(debugBox);
         world.addBody(tableBody);
     }
 
