@@ -435,27 +435,49 @@ dragControls.transformGroup = true;
 // add event listener to highlight dragged objects
 let isDragging;
 
-dragControls.addEventListener('dragstart', function(event) {
+const previousPositions = new Map(); // key: mesh, value: Vector3
+const previousTimes = new Map(); // mesh -> timestamp
 
-    // event.object.material.emissive.set( 0xaaaaaa );
-    console.log(event.object, "being dragged")
+dragControls.addEventListener('dragstart', function(event) {
+    const mesh = event.object;
     isDragging = true;
 
 });
 
 dragControls.addEventListener('dragend', function(event) {
     const mesh = event.object;
-    console.log("mesh is ", mesh)
     const body = meshToBody.get(mesh);
-    console.log("body is ", body)
 
     if (body) {
-        body.position.copy(mesh.position);
-        body.velocity.set(0, -5, 0);
+        const previousPosition = previousPositions.get(mesh);
+        const previousTime = previousTimes.get(mesh);
+
+        if (previousPosition && previousTime) {
+            const deltaPosition = new THREE.Vector3().subVectors(mesh.position, previousPosition);
+            const deltaTime = (performance.now() - previousTime) / 1000; // convert ms → seconds
+
+            if (deltaTime > 0) {
+                const velocity = deltaPosition.clone().divideScalar(deltaTime);
+
+                const velocityScale = 1.5; // tweak this for realism 
+                body.position.copy(mesh.position)
+                body.velocity.set(
+                    velocity.x * velocityScale,
+                    velocity.y * velocityScale * 0.3,
+                    velocity.z * velocityScale
+                );
+            } else {
+                body.velocity.set(0, -5, 0);
+            }
+        } else {
+            body.velocity.set(0, -5, 0);
+        }
     }
 
     isDragging = false;
 });
+
+
 
 //------------------Drag-and-Drop Controls-------------------------
 
