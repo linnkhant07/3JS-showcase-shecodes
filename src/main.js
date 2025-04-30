@@ -170,11 +170,11 @@ loader.load(
 let table, tableBody;
 const tablePhysMat = new CANNON.Material();
 loader.load(
-    '/Centered_Table.glb',
+    '/desk.glb',
     (gltf) => {
         table = gltf.scene;
         table.scale.set(10, 10, 10);
-        table.position.set(0, -3, 23);
+        table.position.set(0, -11, 20);
         table.visible = true;
         scene.add(table);
         // objects.push(table);
