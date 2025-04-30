@@ -310,10 +310,12 @@ box.position.set(0, 20, -10)
 
 //------------------Objects-------------------------
 
+
+//------------------Computer Controls and Animation-------------------------
 //Computer OFF Object
 let computer;
 loader.load(
-    '/Off_Button_Computer_3.glb',
+    '/Computer/Off_Computer.glb',
     (gltf) => {
 
 
@@ -327,28 +329,103 @@ loader.load(
     }
 );
 
-//--- FOR ON COMPUTER ---
+let computerOn = false;
+let onButtonMesh;
 
-//const sphereSize = 1;
+onButtonMesh = new THREE.Mesh(
+    new THREE.SphereGeometry(0.1, 16, 19),
+    new THREE.MeshStandardMaterial({ color: 0x39ff14 })
+);
 
-/*Computer Point Light (green on button)
-const computerOnLight = new THREE.PointLight(0x39ff14, 0.8, 100);
-computerOnLight.position.set(1.65, -2.2, 19.91);
-scene.add(computerOnLight);
+onButtonMesh.position.set(1.65, -2.2, 19.8);
+onButtonMesh.scale.set(2.8, 2.8, 2.8);
+onButtonMesh.visible = false;
+onButtonMesh.material.transparent = true;
+onButtonMesh.material.opacity = 0;
+scene.add(onButtonMesh);
+
+// const buttonHelper = new THREE.BoxHelper(onButtonMesh, 0xffff00); // yellow box
+// scene.add(buttonHelper);
+
+// Raycaster setup
+const raycasterComp = new THREE.Raycaster();
+const mouseComp = new THREE.Vector2();
+
+window.addEventListener('click', (event) => {
+    // Convert mouse click to normalized device coordinates
+    mouseComp.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouseComp.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    raycasterComp.setFromCamera(mouseComp, camera);
+    const intersectsComp = raycasterComp.intersectObjects([onButtonMesh]);
+
+    if (intersectsComp.length > 0 && !computerOn) {
+
+        //--- FOR ON COMPUTER ---
+
+        scene.remove(computer);
+
+        loader.load(
+            '/Computer/On_BlankScreen.glb',
+            (gltf) => {
 
 
-const computerOnLightHelper = new THREE.PointLightHelper(computerOnLight, sphereSize);
-scene.add(computerOnLightHelper);
-*/
+                computer = gltf.scene;
+                computer.scale.set(6.5, 6.5, 6.5);
+                computer.position.set(0, -3, 18);
+                computer.rotation.y = Math.PI / -2;
+                computer.visible = true; // Start invisible
 
-/* Computer Point Light (when on computer screen)
-const computerScreen = new THREE.PointLight(0xffffff, 1, 100);
-computerScreen.position.set(0, 1, 19.8);
-scene.add(computerScreen);
+                scene.add(computer);
+            }
+        );
 
-const computerScreenHelper = new THREE.PointLightHelper(computerOnLight, sphereSize);
-scene.add(computerScreenHelper);
-*/
+        const sphereSize = 1;
+
+        //Computer Point Light(green on button)
+        const computerOnLight = new THREE.PointLight(0x39ff14, 0.8, 100);
+        computerOnLight.position.set(1.65, -2.2, 19.91);
+        scene.add(computerOnLight);
+
+        //const computerOnLightHelper = new THREE.PointLightHelper(computerOnLight, sphereSize);
+        //scene.add(computerOnLightHelper);
+
+        // Computer Point Light (when on computer screen)
+        const computerScreen = new THREE.PointLight(0x00008B, 10, 100);
+        computerScreen.position.set(0, 0.5, 19.01);
+        scene.add(computerScreen);
+
+        //const computerScreenHelper = new THREE.PointLightHelper(computerOnLight, sphereSize);
+        //scene.add(computerScreenHelper);
+        computerOn = true;
+
+    }
+    if (intersectsComp.length > 0 && computerOn) {
+
+        scene.remove(computerOnLight);
+        scene.remove(computer);
+        loader.load(
+            '/Computer/Off_Computer.glb',
+            (gltf) => {
+
+                computer = gltf.scene;
+                computer.scale.set(6.5, 6.5, 6.5);
+                computer.position.set(0, -3, 18);
+                computer.rotation.y = Math.PI / -2;
+                computer.visible = true; // Start invisible
+
+                scene.add(computer);
+            }
+        );
+
+    }
+
+});
+
+
+
+
+
 
 //------------------Drag-and-Drop Controls-------------------------
 
@@ -402,6 +479,7 @@ window.addEventListener('click', (event) => {
     if (intersects.length > 0) {
         ambientLight.intensity = ambientLight.intensity === 0 ? 1 : 0;
         hemisphereLight.intensity = hemisphereLight.intensity === 0 ? 1 : 0;
+        spotLight.intensity = spotLight.intensity === 0 ? 700 : 0;
 
         // Toggle switch models
         if (lightswitch.visible) {
