@@ -343,6 +343,66 @@ loader.load(
     }
 );
 
+let computerLoad1;
+loader.load(
+    '/Computer/On_She.Codes.glb',
+    (gltf) => {
+
+        computerLoad1 = gltf.scene;
+        computerLoad1.scale.set(6.5, 6.5, 6.5);
+        computerLoad1.position.set(0, -3, 18);
+        computerLoad1.rotation.y = Math.PI / -2;
+        computerLoad1.visible = false; // Start invisible
+
+        scene.add(computerLoad1);
+    }
+);
+
+let computerLoad2;
+loader.load(
+    '/Computer/On_She.Codes..glb',
+    (gltf) => {
+
+        computerLoad2 = gltf.scene;
+        computerLoad2.scale.set(6.5, 6.5, 6.5);
+        computerLoad2.position.set(0, -3, 18);
+        computerLoad2.rotation.y = Math.PI / -2;
+        computerLoad2.visible = false; // Start invisible
+
+        scene.add(computerLoad2);
+    }
+);
+
+let computerLoad3;
+loader.load(
+    '/Computer/On_She.Codes...glb',
+    (gltf) => {
+
+        computerLoad3 = gltf.scene;
+        computerLoad3.scale.set(6.5, 6.5, 6.5);
+        computerLoad3.position.set(0, -3, 18);
+        computerLoad3.rotation.y = Math.PI / -2;
+        computerLoad3.visible = false; // Start invisible
+
+        scene.add(computerLoad3);
+    }
+);
+
+let computerLoad4;
+loader.load(
+    '/Computer/On_She.Codes....glb',
+    (gltf) => {
+
+        computerLoad4 = gltf.scene;
+        computerLoad4.scale.set(6.5, 6.5, 6.5);
+        computerLoad4.position.set(0, -3, 18);
+        computerLoad4.rotation.y = Math.PI / -2;
+        computerLoad4.visible = false; // Start invisible
+
+        scene.add(computerLoad4);
+    }
+);
+
 let isComputerOn = false;
 let onButtonMesh;
 
@@ -366,7 +426,8 @@ const raycasterComp = new THREE.Raycaster();
 const mouseComp = new THREE.Vector2();
 
 let computerOnLight; // Declare globally so we can reuse the same object
-let computerScreen; // Also reuse screen light if needed
+let computerScreenTop; // Also reuse screen light if needed
+let computerScreenBottom;
 // let isComputerOn = false;
 
 window.addEventListener('click', (event) => {
@@ -390,12 +451,44 @@ window.addEventListener('click', (event) => {
         }
         computerOnLight.visible = true;
 
-        if (!computerScreen) {
-            computerScreen = new THREE.PointLight(0x00008B, 10, 100);
-            computerScreen.position.set(0, 0.5, 19.01);
-            scene.add(computerScreen);
+        if (!computerScreenTop) {
+            computerScreenTop = new THREE.PointLight(0xffffff, 10, 100);
+            computerScreenTop.position.set(0, 3, 19);
+            scene.add(computerScreenTop);
         }
-        computerScreen.visible = true;
+        computerScreenTop.visible = true;
+
+        if (!computerScreenBottom) {
+            computerScreenBottom = new THREE.PointLight(0xffffff, 10, 100);
+            computerScreenBottom.position.set(0, 5, 19);
+            scene.add(computerScreenBottom);
+        }
+        computerScreenBottom.visible = true;
+
+        async function bootSequence() {
+
+            await new Promise(resolve => setTimeout(resolve, 1000)); // wait 2s
+
+            computerOn.visible = false;
+            computerLoad1.visible = true;
+
+            await new Promise(resolve => setTimeout(resolve, 2000)); // wait 2s
+
+            computerLoad1.visible = false;
+            computerLoad2.visible = true;
+
+            await new Promise(resolve => setTimeout(resolve, 1000)); // wait another 2s
+
+            computerLoad2.visible = false;
+            computerLoad3.visible = true;
+
+            await new Promise(resolve => setTimeout(resolve, 1000)); // final delay
+
+            computerLoad3.visible = false;
+            computerLoad4.visible = true;
+        }
+
+        bootSequence();
 
         isComputerOn = true;
 
@@ -407,17 +500,12 @@ window.addEventListener('click', (event) => {
 
         // Just hide existing lights
         if (computerOnLight) computerOnLight.visible = false;
-        if (computerScreen) computerScreen.visible = false;
+        if (computerScreenTop) computerScreenTop.visible = false;
+        if (computerScreenBottom) computerScreenBottom.visible = false;
 
         isComputerOn = false;
     }
 });
-
-
-
-
-
-
 
 //------------------Drag-and-Drop Controls-------------------------
 
@@ -539,4 +627,6 @@ function animate() {
 }
 
 
+animate();
+animate();
 animate();
