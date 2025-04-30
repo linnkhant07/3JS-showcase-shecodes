@@ -399,6 +399,7 @@ window.addEventListener('click', (event) => {
         // toggle lights
         ambientLight.intensity = ambientLight.intensity === 0 ? 1 : 0;
         hemisphereLight.intensity = hemisphereLight.intensity === 0 ? 1 : 0;
+        spotLight.intensity = hemisphereLight.intensity === 0 ? 1 : 0;
 
         if (lightswitch.visible) {
             lightswitch.visible = false;
@@ -423,7 +424,7 @@ window.addEventListener('click', (event) => {
 
 const shootingStars = []; // store all active stars
 function spawnShootingStars() {
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < 50; i++) {
       const star = new THREE.Mesh(
           new THREE.SphereGeometry(0.2, 8, 8),
           new THREE.MeshBasicMaterial({ color:  new THREE.Color().setHSL(Math.random(), 1, 0.8) })
