@@ -168,6 +168,7 @@ loader.load(
 
 //Table Object
 let table, tableBody;
+const tablePhysMat = new CANNON.Material();
 loader.load(
     '/Centered_Table.glb',
     (gltf) => {
@@ -180,7 +181,6 @@ loader.load(
 
 
         // === Physics body ===
-        const tablePhysMat = new CANNON.Material();
         const tableShape = new CANNON.Box(new CANNON.Vec3(5, 0.25, 5)); // approx. size
         tableBody = new CANNON.Body({
             mass: 0, // static
@@ -211,9 +211,19 @@ loader.load(
 
       const penShape = new CANNON.Cylinder(radiusTop, radiusBottom, height, numSegments);
 
+      const penPhysMat = new CANNON.Material()
+      const tablePenContactMat = new CANNON.ContactMaterial(
+        tablePhysMat,
+        penPhysMat,
+        {restitution: 0.25}
+      )
+
+      world.addContactMaterial(tablePenContactMat)
+
       penBody = new CANNON.Body({
           mass: 1, 
-          position: new CANNON.Vec3(0, 4, 25)
+          position: new CANNON.Vec3(0, 4, 25),
+          material: penPhysMat
           // DO NOT set shape directly here
       });
 
@@ -270,7 +280,7 @@ loader.load(
       const tableVenusContactMat = new CANNON.ContactMaterial(
         tablePhysMat,
         venusPhysMat,
-        {restitution: 0.8}
+        {restitution: 0.7}
       )
 
       world.addContactMaterial(tableVenusContactMat)
