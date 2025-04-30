@@ -358,6 +358,7 @@ window.addEventListener('click', (event) => {
 
     raycasterComp.setFromCamera(mouseComp, camera);
     const intersectsComp = raycasterComp.intersectObjects([onButtonMesh]);
+    console.log('dummy')
 
     if (intersectsComp.length > 0 && !computerOn) {
 
