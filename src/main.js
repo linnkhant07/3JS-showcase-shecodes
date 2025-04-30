@@ -215,7 +215,7 @@ loader.load(
 );
 
 
-/*
+
 let pen, penBody;
 loader.load(
   '/pen.glb',
@@ -224,6 +224,7 @@ loader.load(
       pen.scale.set(0.1, 0.1, 0.1);
       pen.position.set(0, 4, 25);
       pen.visible = true;
+      pen.userData.name = "pen";
 
       // === Physics body ===
       const radiusTop = 0.1;
@@ -262,7 +263,7 @@ loader.load(
       meshToBody.set(pen, penBody); // <-- map the mesh to its body
   }
 );
-*/
+
 
 let venus, venusBody;
 loader.load(
@@ -717,7 +718,10 @@ function animate() {
   //dont let them drag through the table
 
   if (draggedObject) {
-    const tableTopY = -1.8; // or whatever your table’s top Y value is
+    let tableTopY = -1.8; // or whatever your table’s top Y value is
+    if (draggedObject.userData.name === "pen") {
+      tableTopY = -2.8; // or whatever is right for the pen
+  }
 
       console.log(draggedObject)
       if (draggedObject.position.y < tableTopY) {
