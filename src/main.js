@@ -193,6 +193,44 @@ loader.load(
 
 );
 
+//Computer OFF Object
+let computer;
+const computerPhysMat = new CANNON.Material();
+loader.load(
+    '/Computer/Off_Computer.glb',
+    (gltf) => {
+
+
+        computer = gltf.scene;
+        computer.scale.set(6.5, 6.5, 6.5);
+        computer.position.set(0, -3, 18);
+        computer.rotation.y = Math.PI / -2;
+        computer.visible = true; // Start invisible
+
+        scene.add(computer);
+
+        const computerBody = new CANNON.Body({
+          mass: 0, // static
+          position: new CANNON.Vec3(0, -3, 18),
+          material: computerPhysMat
+        });
+        
+        // Monitor block (upper part)
+        const monitorShape = new CANNON.Box(new CANNON.Vec3(1.5, 1.5, 1.5));
+        computerBody.addShape(monitorShape, new CANNON.Vec3(0, 1.5, 0));
+        
+        // Keyboard block (front part)
+        const keyboardShape = new CANNON.Box(new CANNON.Vec3(2.5, 0.2, 1));
+        computerBody.addShape(keyboardShape, new CANNON.Vec3(0, -1, 1));
+        
+        // CPU block (below monitor)
+        const baseShape = new CANNON.Box(new CANNON.Vec3(2, 0.6, 1));
+        computerBody.addShape(baseShape, new CANNON.Vec3(0, 0, 0));
+        
+        world.addBody(computerBody);
+    }
+);
+
 
 let pen, penBody;
 loader.load(
@@ -243,10 +281,10 @@ loader.load(
 
 let venus, venusBody;
 loader.load(
-  '/venus.glb',
+  '/venus_wrapped.glb',
   (gltf) => {
       venus = gltf.scene;
-      venus.scale.set(0.01, 0.01, 0.01);
+      venus.scale.set(0.03, 0.03, 0.03);
       venus.position.set(-5, 6, 20);
       venus.visible = true;
       const texture = textureLoader.load('/textures/venus_surface.jpeg'); // Adjust path
@@ -260,7 +298,7 @@ loader.load(
 
       scene.add(venus);
       // === Physics body for venus ===
-      const venusShape = new CANNON.Sphere(1); // assume radius 0.5 for example
+      const venusShape = new CANNON.Sphere(1.12); // assume radius 0.5 for example
 
       const venusPhysMat = new CANNON.Material()
       venusBody = new CANNON.Body({
@@ -287,7 +325,7 @@ loader.load(
 
       // === Create helper AFTER venusBody is created ===
       const venusHelper = new THREE.Mesh(
-        new THREE.SphereGeometry(1, 16, 16), // same radius as venusShape
+        new THREE.SphereGeometry(1.12, 16, 16), // same radius as venusShape
         new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true })
       );
       venusHelper.position.copy(venusBody.position);
@@ -312,22 +350,7 @@ scene.add(shootStarPanel);
 
 
 //------------------Computer Controls and Animation-------------------------
-//Computer OFF Object
-let computer;
-loader.load(
-    '/Computer/Off_Computer.glb',
-    (gltf) => {
 
-
-        computer = gltf.scene;
-        computer.scale.set(6.5, 6.5, 6.5);
-        computer.position.set(0, -3, 18);
-        computer.rotation.y = Math.PI / -2;
-        computer.visible = true; // Start invisible
-
-        scene.add(computer);
-    }
-);
 
 let computerOn = false;
 let onButtonMesh;
