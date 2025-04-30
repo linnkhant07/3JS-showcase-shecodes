@@ -92,7 +92,7 @@ audioLoader.load('/sounds/lightswitchToggle.mp3', function(buffer) {
 
 });
 
-    //------------------Audio-------------------------
+//------------------Audio-------------------------
 
 //------------------Lights-------------------------
 
@@ -374,8 +374,100 @@ scene.add(shootStarPanel);
 
 //------------------Computer Controls and Animation-------------------------
 
+//--- FOR OFF COMPUTER ---
+let computerOff;
+loader.load(
+    '/Computer/Off_Computer.glb',
+    (gltf) => {
 
-let computerOn = false;
+
+        computerOff = gltf.scene;
+        computerOff.scale.set(6.5, 6.5, 6.5);
+        computerOff.position.set(0, -3, 18);
+        computerOff.rotation.y = Math.PI / -2;
+        computerOff.visible = true; // Start invisible
+
+        scene.add(computerOff);
+    }
+);
+
+//--- FOR ON COMPUTER ---
+let computerOn;
+loader.load(
+    '/Computer/On_BlankScreen.glb',
+    (gltf) => {
+
+        computerOn = gltf.scene;
+        computerOn.scale.set(6.5, 6.5, 6.5);
+        computerOn.position.set(0, -3, 18);
+        computerOn.rotation.y = Math.PI / -2;
+        computerOn.visible = false; // Start invisible
+
+        scene.add(computerOn);
+    }
+);
+
+let computerLoad1;
+loader.load(
+    '/Computer/On_She.Codes.glb',
+    (gltf) => {
+
+        computerLoad1 = gltf.scene;
+        computerLoad1.scale.set(6.5, 6.5, 6.5);
+        computerLoad1.position.set(0, -3, 18);
+        computerLoad1.rotation.y = Math.PI / -2;
+        computerLoad1.visible = false; // Start invisible
+
+        scene.add(computerLoad1);
+    }
+);
+
+let computerLoad2;
+loader.load(
+    '/Computer/On_She.Codes..glb',
+    (gltf) => {
+
+        computerLoad2 = gltf.scene;
+        computerLoad2.scale.set(6.5, 6.5, 6.5);
+        computerLoad2.position.set(0, -3, 18);
+        computerLoad2.rotation.y = Math.PI / -2;
+        computerLoad2.visible = false; // Start invisible
+
+        scene.add(computerLoad2);
+    }
+);
+
+let computerLoad3;
+loader.load(
+    '/Computer/On_She.Codes...glb',
+    (gltf) => {
+
+        computerLoad3 = gltf.scene;
+        computerLoad3.scale.set(6.5, 6.5, 6.5);
+        computerLoad3.position.set(0, -3, 18);
+        computerLoad3.rotation.y = Math.PI / -2;
+        computerLoad3.visible = false; // Start invisible
+
+        scene.add(computerLoad3);
+    }
+);
+
+let computerLoad4;
+loader.load(
+    '/Computer/On_She.Codes....glb',
+    (gltf) => {
+
+        computerLoad4 = gltf.scene;
+        computerLoad4.scale.set(6.5, 6.5, 6.5);
+        computerLoad4.position.set(0, -3, 18);
+        computerLoad4.rotation.y = Math.PI / -2;
+        computerLoad4.visible = false; // Start invisible
+
+        scene.add(computerLoad4);
+    }
+);
+
+let isComputerOn = false;
 let onButtonMesh;
 
 onButtonMesh = new THREE.Mesh(
@@ -397,8 +489,12 @@ scene.add(onButtonMesh);
 const raycasterComp = new THREE.Raycaster();
 const mouseComp = new THREE.Vector2();
 
+let computerOnLight; // Declare globally so we can reuse the same object
+let computerScreenTop; // Also reuse screen light if needed
+let computerScreenBottom;
+// let isComputerOn = false;
+
 window.addEventListener('click', (event) => {
-    // Convert mouse click to normalized device coordinates
     mouseComp.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouseComp.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
@@ -406,73 +502,77 @@ window.addEventListener('click', (event) => {
     const intersectsComp = raycasterComp.intersectObjects([onButtonMesh]);
     console.log('dummy')
 
-    if (intersectsComp.length > 0 && !computerOn) {
+    if (intersectsComp.length > 0 && !isComputerOn) {
 
-        //--- FOR ON COMPUTER ---
+        // === TURN ON ===
+        computerOff.visible = false;
+        computerOn.visible = true;
 
-        scene.remove(computer);
+        // Create light only once
+        if (!computerOnLight) {
+            computerOnLight = new THREE.PointLight(0x39ff14, 0.8, 100);
+            computerOnLight.position.set(1.65, -2.2, 19.91);
+            scene.add(computerOnLight);
+        }
+        computerOnLight.visible = true;
 
-        loader.load(
-            '/Computer/On_BlankScreen.glb',
-            (gltf) => {
+        if (!computerScreenTop) {
+            computerScreenTop = new THREE.PointLight(0xffffff, 10, 100);
+            computerScreenTop.position.set(0, 2.9, 19);
+            scene.add(computerScreenTop);
+        }
+        computerScreenTop.visible = true;
 
+        if (!computerScreenBottom) {
+            computerScreenBottom = new THREE.PointLight(0xffffff, 10, 100);
+            computerScreenBottom.position.set(0, 4, 22);
+            scene.add(computerScreenBottom);
+        }
+        computerScreenBottom.visible = true;
 
-                computer = gltf.scene;
-                computer.scale.set(6.5, 6.5, 6.5);
-                computer.position.set(0, -3, 18);
-                computer.rotation.y = Math.PI / -2;
-                computer.visible = true; // Start invisible
+        async function bootSequence() {
 
-                scene.add(computer);
-            }
-        );
+            //reset so animation reboots each time
+            computerLoad1.visible = false;
+            computerLoad2.visible = false;
+            computerLoad3.visible = false;
+            computerLoad4.visible = false;
 
-        const sphereSize = 1;
+            await new Promise(resolve => setTimeout(resolve, 1000)); // wait 2s
+            computerLoad1.visible = true;
+            computerOn.visible = false;
 
-        //Computer Point Light(green on button)
-        const computerOnLight = new THREE.PointLight(0x39ff14, 0.8, 100);
-        computerOnLight.position.set(1.65, -2.2, 19.91);
-        scene.add(computerOnLight);
+            await new Promise(resolve => setTimeout(resolve, 2000)); // wait 2s
+            computerLoad1.visible = false;
+            computerLoad2.visible = true;
 
-        //const computerOnLightHelper = new THREE.PointLightHelper(computerOnLight, sphereSize);
-        //scene.add(computerOnLightHelper);
+            await new Promise(resolve => setTimeout(resolve, 1000)); // wait another 2s
+            computerLoad2.visible = false;
+            computerLoad3.visible = true;
 
-        // Computer Point Light (when on computer screen)
-        const computerScreen = new THREE.PointLight(0x00008B, 10, 100);
-        computerScreen.position.set(0, 0.5, 19.01);
-        scene.add(computerScreen);
+            await new Promise(resolve => setTimeout(resolve, 1000)); // final delay
+            computerLoad3.visible = false;
+            computerLoad4.visible = true;
+        }
 
-        //const computerScreenHelper = new THREE.PointLightHelper(computerOnLight, sphereSize);
-        //scene.add(computerScreenHelper);
-        computerOn = true;
+        bootSequence();
 
+        isComputerOn = true;
+
+    } else if (intersectsComp.length > 0 && isComputerOn) {
+
+        // === TURN OFF ===
+        computerOn.visible = false;
+        computerOff.visible = true;
+
+        // Just hide existing lights
+        if (computerOnLight) computerOnLight.visible = false;
+        if (computerScreenTop) computerScreenTop.visible = false;
+        if (computerScreenBottom) computerScreenBottom.visible = false;
+
+        isComputerOn = false;
     }
-    if (intersectsComp.length > 0 && computerOn) {
-
-        scene.remove(computerOnLight);
-        scene.remove(computer);
-        loader.load(
-            '/Computer/Off_Computer.glb',
-            (gltf) => {
-
-                computer = gltf.scene;
-                computer.scale.set(6.5, 6.5, 6.5);
-                computer.position.set(0, -3, 18);
-                computer.rotation.y = Math.PI / -2;
-                computer.visible = true; // Start invisible
-
-                scene.add(computer);
-            }
-        );
-
-    }
-
 });
-
-
-
-
-
 
 //------------------Drag-and-Drop Controls-------------------------
 
@@ -719,4 +819,6 @@ function animate() {
 }
 
 
+animate();
+animate();
 animate();
