@@ -253,6 +253,7 @@ loader.load(
 );
 
 
+/*
 let pen, penBody;
 loader.load(
   '/pen.glb',
@@ -299,6 +300,7 @@ loader.load(
       meshToBody.set(pen, penBody); // <-- map the mesh to its body
   }
 );
+*/
 
 let venus, venusBody;
 loader.load(
@@ -652,15 +654,14 @@ function animate() {
 
   //dont let them drag through the table
 
-  /*
   if (draggedObject) {
-    const tableTopY = -2.0; // or whatever your table’s top Y value is
+    const tableTopY = -1.8; // or whatever your table’s top Y value is
 
+      console.log(draggedObject)
       if (draggedObject.position.y < tableTopY) {
           draggedObject.position.y = tableTopY;
       }
   }
-*/
   /*
   if (draggedObject && table) {
     const rayOrigin = draggedObject.position.clone();
