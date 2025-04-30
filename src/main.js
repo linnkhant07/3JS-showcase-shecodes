@@ -214,44 +214,6 @@ loader.load(
 
 );
 
-//Computer OFF Object
-let computer;
-const computerPhysMat = new CANNON.Material();
-loader.load(
-    '/Computer/Off_Computer.glb',
-    (gltf) => {
-
-
-        computer = gltf.scene;
-        computer.scale.set(6.5, 6.5, 6.5);
-        computer.position.set(0, -3, 18);
-        computer.rotation.y = Math.PI / -2;
-        computer.visible = true; // Start invisible
-
-        scene.add(computer);
-
-        const computerBody = new CANNON.Body({
-          mass: 0, // static
-          position: new CANNON.Vec3(0, -3, 18),
-          material: computerPhysMat
-        });
-        
-        // Monitor block (upper part)
-        const monitorShape = new CANNON.Box(new CANNON.Vec3(1.5, 1.5, 1.5));
-        computerBody.addShape(monitorShape, new CANNON.Vec3(0, 1.5, 0));
-        
-        // Keyboard block (front part)
-        const keyboardShape = new CANNON.Box(new CANNON.Vec3(2.5, 0.2, 1));
-        computerBody.addShape(keyboardShape, new CANNON.Vec3(0, -1, 1));
-        
-        // CPU block (below monitor)
-        const baseShape = new CANNON.Box(new CANNON.Vec3(2, 0.6, 1));
-        computerBody.addShape(baseShape, new CANNON.Vec3(0, 0, 0));
-        
-        world.addBody(computerBody);
-    }
-);
-
 
 /*
 let pen, penBody;
@@ -819,6 +781,4 @@ function animate() {
 }
 
 
-animate();
-animate();
 animate();
