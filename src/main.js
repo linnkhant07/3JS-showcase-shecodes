@@ -477,10 +477,30 @@ function animate() {
   if (draggedObject) {
     const tableTopY = -2.0; // or whatever your table’s top Y value is
 
-    if (draggedObject.position.y < tableTopY) {
+      if (draggedObject.position.y < tableTopY) {
+          draggedObject.position.y = tableTopY;
+      }
+  }
+
+  /*
+  if (draggedObject && table) {
+    const rayOrigin = draggedObject.position.clone();
+    const rayDirection = new THREE.Vector3(0, -1, 0);
+    const raycaster = new THREE.Raycaster(rayOrigin, rayDirection, 0, 5); // look up to 5 units down
+  
+    const intersects = raycaster.intersectObject(tableBody, true); // true: check children of GLTF
+    
+    if (intersects.length > 0) {
+      const tableTopY = intersects[0].point.y;
+      
+      console.log("Dragged Y:", draggedObject.position.y, " | Table Top Y:", intersects[0]?.point.y);
+      if (draggedObject.position.y < tableTopY) {
         draggedObject.position.y = tableTopY;
+        console.log(draggedObject, "got lower than table")
+      }
     }
-}
+  }*/
+  
 
 
   //
