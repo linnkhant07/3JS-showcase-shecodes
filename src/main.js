@@ -399,7 +399,7 @@ window.addEventListener('click', (event) => {
         // toggle lights
         ambientLight.intensity = ambientLight.intensity === 0 ? 1 : 0;
         hemisphereLight.intensity = hemisphereLight.intensity === 0 ? 1 : 0;
-        spotLight.intensity = hemisphereLight.intensity === 0 ? 1 : 0;
+        spotLight.intensity = spotLight.intensity === 0 ? 700 : 0;
 
         if (lightswitch.visible) {
             lightswitch.visible = false;
@@ -471,6 +471,19 @@ function animate() {
   spotLight.target.position.copy(pos.clone().add(dir)); // point it forward
   spotLightHelper.update(); // refresh helper too
   // === Spotlight follows cursor: end ===
+
+  //dont let them drag through the table
+
+  if (draggedObject) {
+    const tableTopY = -2.0; // or whatever your table’s top Y value is
+
+    if (draggedObject.position.y < tableTopY) {
+        draggedObject.position.y = tableTopY;
+    }
+}
+
+
+  //
 
   // === Physics step ===
   world.step(1 / 60); // physics simulation step
