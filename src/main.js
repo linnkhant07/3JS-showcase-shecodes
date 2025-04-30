@@ -80,12 +80,9 @@ audioLoader.load('/sounds/lightswitchToggle.mp3', function(buffer) {
     clickSound.setBuffer(buffer);
     clickSound.setVolume(2); // Adjust volume if needed
 
-    console.log(audioLoader)
-    console.log("1")
 });
 
-console.log(audioLoader)
-    //------------------Audio-------------------------
+//------------------Audio-------------------------
 
 //------------------Lights-------------------------
 
@@ -217,7 +214,7 @@ loader.load(
                 // DO NOT set shape directly here
         });
 
-        // 🛠 Rotate the shape by 90 degrees when adding
+        // Rotate the shape by 90 degrees when adding
         const shapeRotation = new CANNON.Quaternion();
         shapeRotation.setFromAxisAngle(new CANNON.Vec3(0, 0, 1), Math.PI / 2);
 
@@ -312,24 +309,41 @@ box.position.set(0, 20, -10)
 
 
 //------------------Computer Controls and Animation-------------------------
-//Computer OFF Object
-let computer;
+
+//--- FOR OFF COMPUTER ---
+let computerOff;
 loader.load(
     '/Computer/Off_Computer.glb',
     (gltf) => {
 
 
-        computer = gltf.scene;
-        computer.scale.set(6.5, 6.5, 6.5);
-        computer.position.set(0, -3, 18);
-        computer.rotation.y = Math.PI / -2;
-        computer.visible = true; // Start invisible
+        computerOff = gltf.scene;
+        computerOff.scale.set(6.5, 6.5, 6.5);
+        computerOff.position.set(0, -3, 18);
+        computerOff.rotation.y = Math.PI / -2;
+        computerOff.visible = true; // Start invisible
 
-        scene.add(computer);
+        scene.add(computerOff);
     }
 );
 
-let computerOn = false;
+//--- FOR ON COMPUTER ---
+let computerOn;
+loader.load(
+    '/Computer/On_BlankScreen.glb',
+    (gltf) => {
+
+        computerOn = gltf.scene;
+        computerOn.scale.set(6.5, 6.5, 6.5);
+        computerOn.position.set(0, -3, 18);
+        computerOn.rotation.y = Math.PI / -2;
+        computerOn.visible = false; // Start invisible
+
+        scene.add(computerOn);
+    }
+);
+
+let isComputerOn = false;
 let onButtonMesh;
 
 onButtonMesh = new THREE.Mesh(
@@ -351,76 +365,54 @@ scene.add(onButtonMesh);
 const raycasterComp = new THREE.Raycaster();
 const mouseComp = new THREE.Vector2();
 
+let computerOnLight; // Declare globally so we can reuse the same object
+let computerScreen; // Also reuse screen light if needed
+// let isComputerOn = false;
+
 window.addEventListener('click', (event) => {
-    // Convert mouse click to normalized device coordinates
     mouseComp.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouseComp.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
     raycasterComp.setFromCamera(mouseComp, camera);
     const intersectsComp = raycasterComp.intersectObjects([onButtonMesh]);
 
-    if (intersectsComp.length > 0 && !computerOn) {
+    if (intersectsComp.length > 0 && !isComputerOn) {
 
-        //--- FOR ON COMPUTER ---
+        // === TURN ON ===
+        computerOff.visible = false;
+        computerOn.visible = true;
 
-        scene.remove(computer);
+        // Create light only once
+        if (!computerOnLight) {
+            computerOnLight = new THREE.PointLight(0x39ff14, 0.8, 100);
+            computerOnLight.position.set(1.65, -2.2, 19.91);
+            scene.add(computerOnLight);
+        }
+        computerOnLight.visible = true;
 
-        loader.load(
-            '/Computer/On_BlankScreen.glb',
-            (gltf) => {
+        if (!computerScreen) {
+            computerScreen = new THREE.PointLight(0x00008B, 10, 100);
+            computerScreen.position.set(0, 0.5, 19.01);
+            scene.add(computerScreen);
+        }
+        computerScreen.visible = true;
 
+        isComputerOn = true;
 
-                computer = gltf.scene;
-                computer.scale.set(6.5, 6.5, 6.5);
-                computer.position.set(0, -3, 18);
-                computer.rotation.y = Math.PI / -2;
-                computer.visible = true; // Start invisible
+    } else if (intersectsComp.length > 0 && isComputerOn) {
 
-                scene.add(computer);
-            }
-        );
+        // === TURN OFF ===
+        computerOn.visible = false;
+        computerOff.visible = true;
 
-        const sphereSize = 1;
+        // Just hide existing lights
+        if (computerOnLight) computerOnLight.visible = false;
+        if (computerScreen) computerScreen.visible = false;
 
-        //Computer Point Light(green on button)
-        const computerOnLight = new THREE.PointLight(0x39ff14, 0.8, 100);
-        computerOnLight.position.set(1.65, -2.2, 19.91);
-        scene.add(computerOnLight);
-
-        //const computerOnLightHelper = new THREE.PointLightHelper(computerOnLight, sphereSize);
-        //scene.add(computerOnLightHelper);
-
-        // Computer Point Light (when on computer screen)
-        const computerScreen = new THREE.PointLight(0x00008B, 10, 100);
-        computerScreen.position.set(0, 0.5, 19.01);
-        scene.add(computerScreen);
-
-        //const computerScreenHelper = new THREE.PointLightHelper(computerOnLight, sphereSize);
-        //scene.add(computerScreenHelper);
-        computerOn = true;
-
+        isComputerOn = false;
     }
-    if (intersectsComp.length > 0 && computerOn) {
-
-        scene.remove(computerOnLight);
-        scene.remove(computer);
-        loader.load(
-            '/Computer/Off_Computer.glb',
-            (gltf) => {
-
-                computer = gltf.scene;
-                computer.scale.set(6.5, 6.5, 6.5);
-                computer.position.set(0, -3, 18);
-                computer.rotation.y = Math.PI / -2;
-                computer.visible = true; // Start invisible
-
-                scene.add(computer);
-            }
-        );
-
-    }
-
 });
+
 
 
 
@@ -438,16 +430,13 @@ let isDragging;
 dragControls.addEventListener('dragstart', function(event) {
 
     // event.object.material.emissive.set( 0xaaaaaa );
-    console.log(event.object, "being dragged")
     isDragging = true;
 
 });
 
 dragControls.addEventListener('dragend', function(event) {
     const mesh = event.object;
-    console.log("mesh is ", mesh)
     const body = meshToBody.get(mesh);
-    console.log("body is ", body)
 
     if (body) {
         body.position.copy(mesh.position);
@@ -537,12 +526,9 @@ function animate() {
         }
     }
 
-    console.log("helpers are ", helpers)
-        // === (Optional) Update helpers if you have them ===
+    // === (Optional) Update helpers if you have them ===
     for (let { helper, body }
         of helpers) {
-        console.log("helper is ", helper)
-        console.log("body is ", body)
         helper.position.copy(body.position);
         helper.quaternion.copy(body.quaternion);
     }
