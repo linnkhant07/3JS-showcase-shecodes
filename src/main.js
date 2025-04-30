@@ -6,6 +6,11 @@ import * as CANNON from 'cannon-es';
 import * as THREE from 'three';
 import { TextureLoader } from 'three';
 
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { AfterimagePass } from 'three/examples/jsm/postprocessing/AfterimagePass.js';
+
+
 
 
 //------------------SETUP-------------------------
@@ -29,14 +34,23 @@ renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setClearColor(0x000000); // full darkness
 
-/* orbit controls disabled
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+
+const afterimagePass = new AfterimagePass();
+afterimagePass.enabled = false; // start disabled
+afterimagePass.uniforms['damp'].value = 0.88;
+
+composer.addPass(afterimagePass);
+
+/* orbit controls disabled*/
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enabled = false;
 controls.enableDamping = true; // for smooth motion
 controls.dampingFactor = 0.05;
 controls.enablePan = true; // allow camera panning
 controls.minDistance = 10; // prevent zooming too close
-controls.maxDistance = 200; // prevent zooming too far*/
+controls.maxDistance = 200; // prevent zooming too far
 
 const size = 50;
 const divisions = 50;
@@ -564,28 +578,45 @@ window.addEventListener('click', (event) => {
 
 const shootingStars = []; // store all active stars
 function spawnShootingStars() {
+
+  afterimagePass.enabled = true; // turn trails on
+
+  // Optional: turn off trails after 1.5s
+  setTimeout(() => {
+    afterimagePass.enabled = false;
+  }, 2500);
+
+
   for (let i = 0; i < 50; i++) {
-      const star = new THREE.Mesh(
-          new THREE.SphereGeometry(0.2, 8, 8),
-          new THREE.MeshBasicMaterial({ color:  new THREE.Color().setHSL(Math.random(), 1, 0.8) })
-      );
+    const starColor = new THREE.Color().setHSL(Math.random(), 0.5, 0.7);
 
-      // Random X/Y near center, Z behind scene
-      star.position.set(
-          (Math.random() - 0.5) * 40, // x: [-20, 20]
-          (Math.random() - 0.5) * 20, // y: [-10, 10]
-          -40 + Math.random() * 20   // z: [-40, -20]
-      );
+  const star = new THREE.Mesh(
+    new THREE.SphereGeometry(0.15, 8, 8),
+    new THREE.MeshStandardMaterial({
+      color: starColor,
+      emissive: starColor.clone(),
+      emissiveIntensity: 1.5,
+      roughness: 0.3,
+      metalness: 0.2
+    })
+  );
 
-      // Random velocity mostly in +Z
-      star.userData.velocity = new THREE.Vector3(
-          (Math.random() - 0.5) * .1, // x drift
-          (Math.random() - 0.5) * .1, // y drift
-          0.3 + Math.random() * 0.3   // strong +z
-      );
+    // Spawn at far left, random height and depth
+    star.position.set(
+      -30,                               // far left on X
+      (Math.random() - 0.5) * 20,        // Y: [-10, 10]
+      10 + Math.random() * 20            // Z: [10, 30] — spread in depth
+    );
 
-      scene.add(star);
-      shootingStars.push(star);
+    // Move right (+X), drift slightly in Y/Z
+    star.userData.velocity = new THREE.Vector3(
+      0.3 + Math.random() * 0.9,         // X: rightward speed
+      (Math.random() - 0.5) * 0.1,       // slight vertical wiggle
+      (Math.random() - 0.5) * 0.05       // slight depth wiggle
+    );
+
+    scene.add(star);
+    shootingStars.push(star);
   }
 }
 
@@ -660,16 +691,13 @@ function animate() {
 
   for (let i = shootingStars.length - 1; i >= 0; i--) {
     const star = shootingStars[i];
-
-    // move
     star.position.add(star.userData.velocity);
-
-    // remove if it went too far
-    if (star.position.z > 50) {
-        scene.remove(star);
-        shootingStars.splice(i, 1);
+  
+    if (star.position.x > 50) {
+      scene.remove(star);
+      shootingStars.splice(i, 1);
     }
-}
+  }
 
   // === (Optional) Update helpers if you have them ===
   for (let { helper, body } of helpers) {
@@ -678,7 +706,8 @@ function animate() {
   }
 
   // === Render scene ===
-  renderer.render(scene, camera);
+  // renderer.render(scene, camera);
+  composer.render();
 }
 
 
