@@ -24,7 +24,7 @@ const camera = new THREE.PerspectiveCamera(
     0.1,
     1000
 );
-camera.position.z = 30;
+camera.position.z = 28;
 
 // Renderer
 const renderer = new THREE.WebGLRenderer({
@@ -125,7 +125,7 @@ scene.add(spotLight.target); // required so it knows what to "point at"
 
 
 const spotLightHelper = new THREE.SpotLightHelper(spotLight)
-// scene.add(spotLightHelper)
+    // scene.add(spotLightHelper)
 
 
 scene.add(spotLight);
@@ -136,12 +136,12 @@ scene.add(spotLight.target); // required so it knows what to "point at"
 //------------------Objects-------------------------
 
 //SCENE BACKGROUND
-const bgTexture = new THREE.TextureLoader().load('space.jpg');
+const bgTexture = new THREE.TextureLoader().load('earf.jpg');
 const texturedPlane = new THREE.Mesh(
     new THREE.PlaneGeometry(250, 250),
     new THREE.MeshStandardMaterial({ map: bgTexture })
 );
-texturedPlane.position.set(25, 10, -0.25); // push it behind the scene -- previous position (0, 0, -40)
+texturedPlane.position.set(25, 5, -40); // push it behind the scene -- previous position (25, 10, -0.25)
 scene.add(texturedPlane);
 
 //On Switch 
@@ -153,13 +153,13 @@ loader.load(
         lightswitch = gltf.scene;
 
         lightswitch.scale.set(1.5, 1.5, 1.5);
-        lightswitch.position.set(25, 10, 0);
+        lightswitch.position.set(13, 5, 7);
         lightswitch.rotation.y = Math.PI / -2;
-        
+
         lightswitch.traverse((child) => {
-          if (child.isMesh) {
-              child.userData.name = 'lightSwitch';
-          }
+            if (child.isMesh) {
+                child.userData.name = 'lightSwitch';
+            }
         });
         scene.add(lightswitch);
     }
@@ -173,7 +173,7 @@ loader.load(
     (gltf) => {
         lightswitchOff = gltf.scene;
         lightswitchOff.scale.set(1.5, 1.5, 1.5);
-        lightswitchOff.position.set(25, 10, 0);
+        lightswitchOff.position.set(13, 5, 7);
         lightswitchOff.rotation.y = Math.PI / -2;
         lightswitchOff.visible = false; // Start invisible
         scene.add(lightswitchOff);
@@ -218,126 +218,141 @@ loader.load(
 
 let pen, penBody;
 loader.load(
-  '/pen.glb',
-  (gltf) => {
-      pen = gltf.scene;
-      pen.scale.set(0.1, 0.1, 0.1);
-      pen.position.set(0, 4, 25);
-      pen.visible = true;
-      pen.userData.name = "pen";
+    '/pen.glb',
+    (gltf) => {
+        pen = gltf.scene;
+        pen.scale.set(0.1, 0.1, 0.1);
+        pen.position.set(5, 4, 22);
+        pen.visible = true;
+        pen.userData.name = "pen";
 
-      // === Physics body ===
-      const radiusTop = 0.1;
-      const radiusBottom = 0.1;
-      const height = 0.9;
-      const numSegments = 8;
+        // === Physics body ===
+        const radiusTop = 0.1;
+        const radiusBottom = 0.1;
+        const height = 0.9;
+        const numSegments = 8;
 
-      const penShape = new CANNON.Cylinder(radiusTop, radiusBottom, height, numSegments);
+        const penShape = new CANNON.Cylinder(radiusTop, radiusBottom, height, numSegments);
 
-      const penPhysMat = new CANNON.Material()
-      const tablePenContactMat = new CANNON.ContactMaterial(
-        tablePhysMat,
-        penPhysMat,
-        {restitution: 0.25}
-      )
+        const penPhysMat = new CANNON.Material()
+        const tablePenContactMat = new CANNON.ContactMaterial(
+            tablePhysMat,
+            penPhysMat, { restitution: 0.25 }
+        )
 
-      world.addContactMaterial(tablePenContactMat)
+        world.addContactMaterial(tablePenContactMat)
 
-      penBody = new CANNON.Body({
-          mass: 1, 
-          position: new CANNON.Vec3(0, 4, 25),
-          material: penPhysMat
-          // DO NOT set shape directly here
-      });
+        penBody = new CANNON.Body({
+            mass: 1,
+            position: new CANNON.Vec3(5, 4, 22),
+            material: penPhysMat
+                // DO NOT set shape directly here
+        });
 
-      // 🛠 Rotate the shape by 90 degrees when adding
-      const shapeRotation = new CANNON.Quaternion();
-      shapeRotation.setFromAxisAngle(new CANNON.Vec3(0, 0, 1), Math.PI / 2);
+        // 🛠 Rotate the shape by 90 degrees when adding
+        const shapeRotation = new CANNON.Quaternion();
+        shapeRotation.setFromAxisAngle(new CANNON.Vec3(0, 0, 1), Math.PI / 2);
 
-      penBody.addShape(penShape, new CANNON.Vec3(0, 0, 0), shapeRotation);
+        penBody.addShape(penShape, new CANNON.Vec3(0, 0, 0), shapeRotation);
 
-      scene.add(pen);
-      world.addBody(penBody);
+        scene.add(pen);
+        world.addBody(penBody);
 
-      objects.push(pen); // still add to DragControls array
-      meshToBody.set(pen, penBody); // <-- map the mesh to its body
-  }
+        objects.push(pen); // still add to DragControls array
+        meshToBody.set(pen, penBody); // <-- map the mesh to its body
+    }
 );
 
 
 let venus, venusBody;
 loader.load(
-  '/venus_wrapped.glb',
-  (gltf) => {
-      venus = gltf.scene;
-      venus.scale.set(0.03, 0.03, 0.03);
-      venus.position.set(-5, 6, 20);
-      venus.visible = true;
-      const texture = textureLoader.load('/textures/venus_surface.jpeg'); // Adjust path
+    '/venus_wrapped.glb',
+    (gltf) => {
+        venus = gltf.scene;
+        venus.scale.set(0.03, 0.03, 0.03);
+        venus.position.set(-5, 6, 20);
+        venus.visible = true;
+        const texture = textureLoader.load('/textures/venus_surface.jpeg'); // Adjust path
 
-      venus.traverse((child) => {
-        if (child.isMesh) {
-          child.material.map = texture;
-          child.material.needsUpdate = true;
-        }
-      });
+        venus.traverse((child) => {
+            if (child.isMesh) {
+                child.material.map = texture;
+                child.material.needsUpdate = true;
+            }
+        });
 
-      scene.add(venus);
-      // === Physics body for venus ===
-      const venusShape = new CANNON.Sphere(1.12); // assume radius 0.5 for example
+        scene.add(venus);
+        // === Physics body for venus ===
+        const venusShape = new CANNON.Sphere(1.12); // assume radius 0.5 for example
 
-      const venusPhysMat = new CANNON.Material()
-      venusBody = new CANNON.Body({
-          mass: 0.9, 
-          position: new CANNON.Vec3(-5, 6, 20),
-          material: venusPhysMat
-      });
+        const venusPhysMat = new CANNON.Material()
+        venusBody = new CANNON.Body({
+            mass: 0.9,
+            position: new CANNON.Vec3(-5, 6, 20),
+            material: venusPhysMat
+        });
 
 
-      venusBody.addShape(venusShape);
-      world.addBody(venusBody);
-      objects.push(venus);
-      meshToBody.set(venus, venusBody);
+        venusBody.addShape(venusShape);
+        world.addBody(venusBody);
+        objects.push(venus);
+        meshToBody.set(venus, venusBody);
 
-      // Check if tableBody is already loaded
-      //create boucning stuff
-      const tableVenusContactMat = new CANNON.ContactMaterial(
-        tablePhysMat,
-        venusPhysMat,
-        {restitution: 0.7}
-      )
+        // Check if tableBody is already loaded
+        //create boucning stuff
+        const tableVenusContactMat = new CANNON.ContactMaterial(
+            tablePhysMat,
+            venusPhysMat, { restitution: 0.7 }
+        )
 
-      world.addContactMaterial(tableVenusContactMat)
+        world.addContactMaterial(tableVenusContactMat)
 
-      //with the computer
-      const computerVenusContact = new CANNON.ContactMaterial(
-        venusPhysMat,
-        computerPhysMat,
-        { restitution: 0.6 } // nice bounce
-      );
-      world.addContactMaterial(computerVenusContact);
+        //with the computer
+        const computerVenusContact = new CANNON.ContactMaterial(
+            venusPhysMat,
+            computerPhysMat, { restitution: 0.6 } // nice bounce
+        );
+        world.addContactMaterial(computerVenusContact);
 
-      // === Create helper AFTER venusBody is created ===
-      const venusHelper = new THREE.Mesh(
-        new THREE.SphereGeometry(1.12, 16, 16), // same radius as venusShape
-        new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true })
-      );
-      venusHelper.position.copy(venusBody.position);
+        // === Create helper AFTER venusBody is created ===
+        const venusHelper = new THREE.Mesh(
+            new THREE.SphereGeometry(1.12, 16, 16), // same radius as venusShape
+            new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true })
+        );
+        venusHelper.position.copy(venusBody.position);
 
-      helpers.push({ helper: venusHelper, body: venusBody });
-      // scene.add(venusHelper);
-  }
+        helpers.push({ helper: venusHelper, body: venusBody });
+        // scene.add(venusHelper);
+    }
 );
 
 
 //button to click shoot stars
-const shootStarPanel = new THREE.Mesh(
-  new THREE.BoxGeometry(10, 6, 0), // width, height, depth
-  new THREE.MeshBasicMaterial({ color: 0x00ffff }) // cyan glowing panel
-);
-shootStarPanel.position.set(-20, 10, 0); // place it near your wall (adjust if needed)
+
+const starTextureLoader = new THREE.TextureLoader();
+const posterTexture = starTextureLoader.load('/textures/StarPoster.jpg');
+const posterMaterials = [
+    new THREE.MeshStandardMaterial({ color: 0x000000 }), // Right
+    new THREE.MeshStandardMaterial({ color: 0x000000 }), // Left
+    new THREE.MeshStandardMaterial({ color: 0x000000 }), // Top
+    new THREE.MeshStandardMaterial({ color: 0x000000 }), // Bottom
+    new THREE.MeshStandardMaterial({ map: posterTexture, roughness: 0.5, metalness: 0 }), // Front
+    new THREE.MeshStandardMaterial({ color: 0x000000 }) // Back
+];
+const geometry = new THREE.BoxGeometry(8, 10, 0.1); // poster shape
+const shootStarPanel = new THREE.Mesh(geometry, posterMaterials);
+scene.add(shootStarPanel);
+shootStarPanel.position.set(-18, 10, 0);
+
 shootStarPanel.userData.name = "shootStarPanel"
 scene.add(shootStarPanel);
+
+
+// const shootStarPanel = new THREE.Mesh(
+//     new THREE.BoxGeometry(10, 6, 0), // width, height, depth
+//     new THREE.MeshBasicMaterial({ color: 0x00ffff }) // cyan glowing panel
+// );
+
 
 
 //------------------Objects-------------------------
@@ -363,9 +378,9 @@ loader.load(
         // === Physics setup for the computer ===
         computerPhysMat = new CANNON.Material();
         const computerBody = new CANNON.Body({
-          mass: 0, // static
-          position: new CANNON.Vec3(0, -2.5, 20),
-          material: computerPhysMat
+            mass: 0, // static
+            position: new CANNON.Vec3(0, -2.5, 20),
+            material: computerPhysMat
         });
 
         // --- Add shapes for each visible part ---
@@ -390,7 +405,7 @@ loader.load(
         // computerHelper.position.set(0, -1.5 + 1.5, 18);
         // scene.add(computerHelper);
         // helpers.push({ helper: computerHelper, body: computerBody });
-        
+
         // const keyboardHelper = new THREE.Mesh(
         //   new THREE.BoxGeometry(8, 0.4, 2),
         //   new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true })
@@ -398,7 +413,7 @@ loader.load(
         // keyboardHelper.position.set(0, -4.1, 19.4);
         // scene.add(keyboardHelper);
         // helpers.push({ helper: keyboardHelper, body: computerBody });
-        
+
         // const baseHelper = new THREE.Mesh(
         //   new THREE.BoxGeometry(3.2, 9.2, 2.6),
         //   new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true })
@@ -406,7 +421,7 @@ loader.load(
         // baseHelper.position.set(0, -3, 18);
         // scene.add(baseHelper);
         // helpers.push({ helper: baseHelper, body: computerBody });
-        
+
     }
 );
 
@@ -595,7 +610,7 @@ window.addEventListener('click', (event) => {
 
 //------------------Drag-and-Drop Controls-------------------------
 
-const dragControls = new DragControls( objects, camera, renderer.domElement );
+const dragControls = new DragControls(objects, camera, renderer.domElement);
 dragControls.transformGroup = true;
 
 // add event listener to highlight dragged objects
@@ -603,49 +618,49 @@ let isDragging;
 let draggedObject = null;
 
 const previousPositions = new Map(); // key: mesh, value: Vector3
-const previousTimes = new Map();     // mesh -> timestamp
+const previousTimes = new Map(); // mesh -> timestamp
 
-dragControls.addEventListener('dragstart', function (event) {
-  const mesh = event.object;
-  isDragging = true;
-  draggedObject = event.object;
+dragControls.addEventListener('dragstart', function(event) {
+    const mesh = event.object;
+    isDragging = true;
+    draggedObject = event.object;
 
-  previousPositions.set(mesh, mesh.position.clone());
-  previousTimes.set(mesh, performance.now()); // store high-resolution time
+    previousPositions.set(mesh, mesh.position.clone());
+    previousTimes.set(mesh, performance.now()); // store high-resolution time
 });
 
-dragControls.addEventListener('dragend', function (event) {
-  const mesh = event.object;
-  const body = meshToBody.get(mesh);
+dragControls.addEventListener('dragend', function(event) {
+    const mesh = event.object;
+    const body = meshToBody.get(mesh);
 
-  if (body) {
-      const previousPosition = previousPositions.get(mesh);
-      const previousTime = previousTimes.get(mesh);
+    if (body) {
+        const previousPosition = previousPositions.get(mesh);
+        const previousTime = previousTimes.get(mesh);
 
-      if (previousPosition && previousTime) {
-          const deltaPosition = new THREE.Vector3().subVectors(mesh.position, previousPosition);
-          const deltaTime = (performance.now() - previousTime) / 1000; // convert ms → seconds
+        if (previousPosition && previousTime) {
+            const deltaPosition = new THREE.Vector3().subVectors(mesh.position, previousPosition);
+            const deltaTime = (performance.now() - previousTime) / 1000; // convert ms → seconds
 
-          if (deltaTime > 0) {
-              const velocity = deltaPosition.clone().divideScalar(deltaTime);
+            if (deltaTime > 0) {
+                const velocity = deltaPosition.clone().divideScalar(deltaTime);
 
-              const velocityScale = 1.5; // tweak this for realism 
-              body.position.copy(mesh.position)
-              body.velocity.set(
-                  velocity.x * velocityScale,
-                  velocity.y * velocityScale * 0.3,
-                  velocity.z * velocityScale
-              );
-          } else {
-              body.velocity.set(0, -5, 0);
-          }
-      } else {
-          body.velocity.set(0, -5, 0);
-      }
-  }
+                const velocityScale = 1.5; // tweak this for realism 
+                body.position.copy(mesh.position)
+                body.velocity.set(
+                    velocity.x * velocityScale,
+                    velocity.y * velocityScale * 0.3,
+                    velocity.z * velocityScale
+                );
+            } else {
+                body.velocity.set(0, -5, 0);
+            }
+        } else {
+            body.velocity.set(0, -5, 0);
+        }
+    }
 
-  isDragging = false;
-  draggedObject = null;
+    isDragging = false;
+    draggedObject = null;
 });
 
 
@@ -670,32 +685,32 @@ window.addEventListener('click', (event) => {
     const intersects = raycaster.intersectObjects(clickableObjects);
 
     if (intersects.length > 0) {
-      const clickedObject = intersects[0].object;
-  
-      if (clickedObject.userData.name === 'shootStarPanel') {
-        spawnShootingStars();
-        console.log(shootingStars)
+        const clickedObject = intersects[0].object;
 
-      } else if (clickedObject.userData.name === 'lightSwitch') {
-        console.log("inside intersects, ", intersects[0].object)
-        // toggle lights
-        ambientLight.intensity = ambientLight.intensity === 0 ? 1 : 0;
-        hemisphereLight.intensity = hemisphereLight.intensity === 0 ? 1 : 0;
-        spotLight.intensity = spotLight.intensity === 0 ? 700 : 0;
+        if (clickedObject.userData.name === 'shootStarPanel') {
+            spawnShootingStars();
+            console.log(shootingStars)
 
-        if (lightswitch.visible) {
-            lightswitch.visible = false;
-            lightswitchOff.visible = true;
-        } else {
-            lightswitch.visible = true;
-            lightswitchOff.visible = false;
+        } else if (clickedObject.userData.name === 'lightSwitch') {
+            console.log("inside intersects, ", intersects[0].object)
+                // toggle lights
+            ambientLight.intensity = ambientLight.intensity === 0 ? 1 : 0;
+            hemisphereLight.intensity = hemisphereLight.intensity === 0 ? 1 : 0;
+            spotLight.intensity = spotLight.intensity === 0 ? 700 : 0;
+
+            if (lightswitch.visible) {
+                lightswitch.visible = false;
+                lightswitchOff.visible = true;
+            } else {
+                lightswitch.visible = true;
+                lightswitchOff.visible = false;
+            }
+
+            if (clickSound.buffer) {
+                if (clickSound.isPlaying) clickSound.stop();
+                clickSound.play();
+            }
         }
-
-        if (clickSound.buffer) {
-            if (clickSound.isPlaying) clickSound.stop();
-            clickSound.play();
-        }
-      }
     }
 
 });
@@ -707,45 +722,44 @@ window.addEventListener('click', (event) => {
 const shootingStars = []; // store all active stars
 function spawnShootingStars() {
 
-  afterimagePass.enabled = true; // turn trails on
+    afterimagePass.enabled = true; // turn trails on
 
-  // Optional: turn off trails after 1.5s
-  setTimeout(() => {
-    afterimagePass.enabled = false;
-  }, 2500);
+    // Optional: turn off trails after 1.5s
+    setTimeout(() => {
+        afterimagePass.enabled = false;
+    }, 2500);
 
 
-  for (let i = 0; i < 50; i++) {
-    const starColor = new THREE.Color().setHSL(Math.random(), 0.5, 0.7);
+    for (let i = 0; i < 50; i++) {
+        const starColor = new THREE.Color().setHSL(Math.random(), 0.5, 0.7);
 
-  const star = new THREE.Mesh(
-    new THREE.SphereGeometry(0.15, 8, 8),
-    new THREE.MeshStandardMaterial({
-      color: starColor,
-      emissive: starColor.clone(),
-      emissiveIntensity: 1.5,
-      roughness: 0.3,
-      metalness: 0.2
-    })
-  );
+        const star = new THREE.Mesh(
+            new THREE.SphereGeometry(0.15, 8, 8),
+            new THREE.MeshStandardMaterial({
+                color: starColor,
+                emissive: starColor.clone(),
+                emissiveIntensity: 1.5,
+                roughness: 0.3,
+                metalness: 0.2
+            })
+        );
 
-    // Spawn at far left, random height and depth
-    star.position.set(
-      -30,                               // far left on X
-      (Math.random() - 0.5) * 20,        // Y: [-10, 10]
-      10 + Math.random() * 20            // Z: [10, 30] — spread in depth
-    );
+        // Spawn at far left, random height and depth
+        star.position.set(-30, // far left on X
+            (Math.random() - 0.5) * 20, // Y: [-10, 10]
+            10 + Math.random() * 20 // Z: [10, 30] — spread in depth
+        );
 
-    // Move right (+X), drift slightly in Y/Z
-    star.userData.velocity = new THREE.Vector3(
-      0.3 + Math.random() * 0.9,         // X: rightward speed
-      (Math.random() - 0.5) * 0.1,       // slight vertical wiggle
-      (Math.random() - 0.5) * 0.05       // slight depth wiggle
-    );
+        // Move right (+X), drift slightly in Y/Z
+        star.userData.velocity = new THREE.Vector3(
+            0.3 + Math.random() * 0.9, // X: rightward speed
+            (Math.random() - 0.5) * 0.1, // slight vertical wiggle
+            (Math.random() - 0.5) * 0.05 // slight depth wiggle
+        );
 
-    scene.add(star);
-    shootingStars.push(star);
-  }
+        scene.add(star);
+        shootingStars.push(star);
+    }
 }
 
 
@@ -756,89 +770,91 @@ function spawnShootingStars() {
 
 // Animate
 function animate() {
-  requestAnimationFrame(animate);
+    requestAnimationFrame(animate);
 
-  // === Spotlight follows cursor: start ===
-  const vector = new THREE.Vector3(mouseCords.x, mouseCords.y, 0.5); // NDC with z = 0.5 for depth
-  vector.unproject(camera); // convert to world coords
+    // === Spotlight follows cursor: start ===
+    const vector = new THREE.Vector3(mouseCords.x, mouseCords.y, 0.5); // NDC with z = 0.5 for depth
+    vector.unproject(camera); // convert to world coords
 
-  const dir = vector.sub(camera.position).normalize(); // direction from camera
-  const distance = 0.1; // how far in front of camera
-  const pos = camera.position.clone().add(dir.multiplyScalar(distance)); // new light position
+    const dir = vector.sub(camera.position).normalize(); // direction from camera
+    const distance = 0.1; // how far in front of camera
+    const pos = camera.position.clone().add(dir.multiplyScalar(distance)); // new light position
 
-  spotLight.position.copy(pos); // move spotlight
-  spotLight.target.position.copy(pos.clone().add(dir)); // point it forward
-  spotLightHelper.update(); // refresh helper too
-  // === Spotlight follows cursor: end ===
+    spotLight.position.copy(pos); // move spotlight
+    spotLight.target.position.copy(pos.clone().add(dir)); // point it forward
+    spotLightHelper.update(); // refresh helper too
+    // === Spotlight follows cursor: end ===
 
-  //dont let them drag through the table
+    //dont let them drag through the table
 
-  if (draggedObject) {
-    let tableTopY = -1.8; // or whatever your table’s top Y value is
-    if (draggedObject.userData.name === "pen") {
-      tableTopY = -2.8; // or whatever is right for the pen
-  }
+    if (draggedObject) {
+        let tableTopY = -1.8; // or whatever your table’s top Y value is
+        if (draggedObject.userData.name === "pen") {
+            tableTopY = -2.8; // or whatever is right for the pen
+        }
 
-      console.log(draggedObject)
-      if (draggedObject.position.y < tableTopY) {
-          draggedObject.position.y = tableTopY;
-      }
-  }
-  /*
-  if (draggedObject && table) {
-    const rayOrigin = draggedObject.position.clone();
-    const rayDirection = new THREE.Vector3(0, -1, 0);
-    const raycaster = new THREE.Raycaster(rayOrigin, rayDirection, 0, 5); // look up to 5 units down
+        console.log(draggedObject)
+        if (draggedObject.position.y < tableTopY) {
+            draggedObject.position.y = tableTopY;
+        }
+    }
+    /*
+    if (draggedObject && table) {
+      const rayOrigin = draggedObject.position.clone();
+      const rayDirection = new THREE.Vector3(0, -1, 0);
+      const raycaster = new THREE.Raycaster(rayOrigin, rayDirection, 0, 5); // look up to 5 units down
   
-    const intersects = raycaster.intersectObject(tableBody, true); // true: check children of GLTF
-    
-    if (intersects.length > 0) {
-      const tableTopY = intersects[0].point.y;
+      const intersects = raycaster.intersectObject(tableBody, true); // true: check children of GLTF
       
-      console.log("Dragged Y:", draggedObject.position.y, " | Table Top Y:", intersects[0]?.point.y);
-      if (draggedObject.position.y < tableTopY) {
-        draggedObject.position.y = tableTopY;
-        console.log(draggedObject, "got lower than table")
+      if (intersects.length > 0) {
+        const tableTopY = intersects[0].point.y;
+        
+        console.log("Dragged Y:", draggedObject.position.y, " | Table Top Y:", intersects[0]?.point.y);
+        if (draggedObject.position.y < tableTopY) {
+          draggedObject.position.y = tableTopY;
+          console.log(draggedObject, "got lower than table")
+        }
       }
+    }*/
+
+
+
+    //
+
+    // === Physics step ===
+    world.step(1 / 60); // physics simulation step
+
+    // === Drag and drop physics syncing ===
+    for (let mesh of objects) {
+        const body = meshToBody.get(mesh);
+        if (body && mesh !== draggedObject) {
+            mesh.position.copy(body.position);
+            mesh.quaternion.copy(body.quaternion);
+        }
     }
-  }*/
-  
 
+    for (let i = shootingStars.length - 1; i >= 0; i--) {
+        const star = shootingStars[i];
+        star.position.add(star.userData.velocity);
 
-  //
-
-  // === Physics step ===
-  world.step(1 / 60); // physics simulation step
-
-  // === Drag and drop physics syncing ===
-  for (let mesh of objects) {
-    const body = meshToBody.get(mesh);
-    if (body && mesh !== draggedObject) {
-        mesh.position.copy(body.position);
-        mesh.quaternion.copy(body.quaternion);
+        if (star.position.x > 50) {
+            scene.remove(star);
+            shootingStars.splice(i, 1);
+        }
     }
-  }
 
-  for (let i = shootingStars.length - 1; i >= 0; i--) {
-    const star = shootingStars[i];
-    star.position.add(star.userData.velocity);
-  
-    if (star.position.x > 50) {
-      scene.remove(star);
-      shootingStars.splice(i, 1);
+    // === (Optional) Update helpers if you have them ===
+    for (let { helper, body }
+        of helpers) {
+        helper.position.copy(body.position);
+        helper.quaternion.copy(body.quaternion);
     }
-  }
 
-  // === (Optional) Update helpers if you have them ===
-  for (let { helper, body } of helpers) {
-      helper.position.copy(body.position);
-      helper.quaternion.copy(body.quaternion);
-  }
-
-  // === Render scene ===
-  // renderer.render(scene, camera);
-  composer.render();
+    // === Render scene ===
+    // renderer.render(scene, camera);
+    composer.render();
 }
 
 
+animate();
 animate();
