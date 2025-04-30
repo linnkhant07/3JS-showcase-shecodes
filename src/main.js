@@ -31,7 +31,7 @@ renderer.setClearColor(0x000000); // full darkness
 
 /* orbit controls disabled */
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.enabled = true;
+controls.enabled = false;
 controls.enableDamping = true; // for smooth motion
 controls.dampingFactor = 0.05;
 controls.enablePan = true; // allow camera panning
