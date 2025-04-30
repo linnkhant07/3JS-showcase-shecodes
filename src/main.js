@@ -63,10 +63,6 @@ world.gravity.set(0, -9.82, 0); // Earth gravity
 
 //------------------Physics-------------------------
 
-//------------------Interact-------------------------
-
-
-//------------------Interact-------------------------
 
 //------------------Audio-------------------------
 const listener = new THREE.AudioListener();
@@ -312,6 +308,7 @@ dragControls.transformGroup = true;
 
 // add event listener to highlight dragged objects
 let isDragging;
+let draggedObject = null;
 
 const previousPositions = new Map(); // key: mesh, value: Vector3
 const previousTimes = new Map();     // mesh -> timestamp
@@ -319,6 +316,7 @@ const previousTimes = new Map();     // mesh -> timestamp
 dragControls.addEventListener('dragstart', function (event) {
   const mesh = event.object;
   isDragging = true;
+  draggedObject = event.object;
 
   previousPositions.set(mesh, mesh.position.clone());
   previousTimes.set(mesh, performance.now()); // store high-resolution time
@@ -355,13 +353,14 @@ dragControls.addEventListener('dragend', function (event) {
   }
 
   isDragging = false;
+  draggedObject = null;
 });
 
 
 
 //------------------Drag-and-Drop Controls-------------------------
 
-//------------------Features-------------------------
+//------------------Interact-------------------------
 
 // ambient light SWITCH ON / OFF 
 const raycaster = new THREE.Raycaster(); //Raycasting is used for mouse picking
@@ -408,13 +407,13 @@ window.addEventListener('click', (event) => {
 
 });
 
-//------------------Features-------------------------
+//------------------Interact-------------------------
 
-//------------------Shooting Stars-------------------------
+//------------------Shooting Stars Function-------------------------
 
 const shootingStars = []; // store all active stars
 function spawnShootingStars() {
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < 20; i++) {
       const star = new THREE.Mesh(
           new THREE.SphereGeometry(0.2, 8, 8),
           new THREE.MeshBasicMaterial({ color:  new THREE.Color().setHSL(Math.random(), 1, 0.8) })
@@ -429,9 +428,9 @@ function spawnShootingStars() {
 
       // Random velocity mostly in +Z
       star.userData.velocity = new THREE.Vector3(
-          (Math.random() - 0.5) * .5, // x drift
-          (Math.random() - 0.5) * .5, // y drift
-          0.8 + Math.random() * 0.8    // strong +z
+          (Math.random() - 0.5) * .1, // x drift
+          (Math.random() - 0.5) * .1, // y drift
+          0.3 + Math.random() * 0.3   // strong +z
       );
 
       scene.add(star);
@@ -442,7 +441,7 @@ function spawnShootingStars() {
 
 
 
-//------------------Shooting Stars-------------------------
+//------------------Shooting Stars Function-------------------------
 
 
 // Animate
@@ -466,14 +465,12 @@ function animate() {
   world.step(1 / 60); // physics simulation step
 
   // === Drag and drop physics syncing ===
-  if (!isDragging) {
-      for (let mesh of objects) {
-          const body = meshToBody.get(mesh);
-          if (body) {
-              mesh.position.copy(body.position);
-              mesh.quaternion.copy(body.quaternion);
-          }
-      }
+  for (let mesh of objects) {
+    const body = meshToBody.get(mesh);
+    if (body && mesh !== draggedObject) {
+        mesh.position.copy(body.position);
+        mesh.quaternion.copy(body.quaternion);
+    }
   }
 
   for (let i = shootingStars.length - 1; i >= 0; i--) {
