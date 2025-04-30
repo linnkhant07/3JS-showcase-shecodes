@@ -453,37 +453,39 @@ window.addEventListener('click', (event) => {
 
         if (!computerScreenTop) {
             computerScreenTop = new THREE.PointLight(0xffffff, 10, 100);
-            computerScreenTop.position.set(0, 3, 19);
+            computerScreenTop.position.set(0, 2.9, 19);
             scene.add(computerScreenTop);
         }
         computerScreenTop.visible = true;
 
         if (!computerScreenBottom) {
             computerScreenBottom = new THREE.PointLight(0xffffff, 10, 100);
-            computerScreenBottom.position.set(0, 5, 19);
+            computerScreenBottom.position.set(0, 4, 22);
             scene.add(computerScreenBottom);
         }
         computerScreenBottom.visible = true;
 
         async function bootSequence() {
 
-            await new Promise(resolve => setTimeout(resolve, 1000)); // wait 2s
+            //reset so animation reboots each time
+            computerLoad1.visible = false;
+            computerLoad2.visible = false;
+            computerLoad3.visible = false;
+            computerLoad4.visible = false;
 
-            computerOn.visible = false;
+            await new Promise(resolve => setTimeout(resolve, 1000)); // wait 2s
             computerLoad1.visible = true;
+            computerOn.visible = false;
 
             await new Promise(resolve => setTimeout(resolve, 2000)); // wait 2s
-
             computerLoad1.visible = false;
             computerLoad2.visible = true;
 
             await new Promise(resolve => setTimeout(resolve, 1000)); // wait another 2s
-
             computerLoad2.visible = false;
             computerLoad3.visible = true;
 
             await new Promise(resolve => setTimeout(resolve, 1000)); // final delay
-
             computerLoad3.visible = false;
             computerLoad4.visible = true;
         }
